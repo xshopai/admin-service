@@ -1,93 +1,141 @@
-# Admin Service
+# 👥 Admin Service
 
-`admin-service` is a microservice responsible for privileged user management and administrative operations for the AIOutlet platform. It provides secure endpoints for admin users to manage user accounts, roles, and statuses across the platform.
+Administrative operations microservice for xShop.ai - handles privileged user management, role administration, and system-wide administrative operations.
 
-**Architecture Pattern:** Publisher-only service (following Amazon's admin portal pattern)
-
-- Admins take actions through API endpoints
-- Publishes events for audit/notification (e.g., `admin.user.updated`, `admin.user.deleted`)
-- Does NOT consume events - it's an action center, not an event responder
-
----
-
-## Features
-
-- List all users (admin only)
-- View user details by ID
-- Update user profile, roles, and status (activate/deactivate)
-- Change user password (admin-initiated)
-- Delete user accounts
-- Publishes admin action events to message broker
-- Robust input validation and error handling
-- Structured logging for audit and traceability
-- Forwards admin JWT to user-service for all privileged actions
-
----
-
-## Architecture
-
-This service is built with Node.js and Express, using Mongoose for MongoDB object modeling and Axios for inter-service communication with the user-service.
-
-**Event-Driven Design:**
-
-- **Publisher Only**: Emits events when admins perform actions
-- **No Consumer**: Does not react to events from other services
-- **Event Notifications**: Handled by notification-service and audit-service
-
-The microservice is designed to be deployed independently and can run locally, via Docker, or in Kubernetes (AKS).
-
----
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js v16+
-- MongoDB instance (local, Docker, or cloud)
-- A running user-service instance (for user management APIs)
-- Service runs on port **1003**
-- Dapr HTTP port: **3503**, gRPC port: **50003**
+- **Node.js** 20+ ([Download](https://nodejs.org/))
+- **Dapr CLI** 1.16+ ([Install Guide](https://docs.dapr.io/getting-started/install-dapr-cli/))
 
-### Environment Variables
+### Setup
 
-Create a `.env` file in the root with the following variables:
-
-```env
-# .env.example for admin-service
-PORT=1003
-USER_SERVICE_URL=http://localhost:1002/api/users
-USER_SERVICE_SECRET=your-shared-secret
-DAPR_HTTP_PORT=3503
-DAPR_GRPC_PORT=50003
-
+**1. Clone & Install**
+```bash
+git clone https://github.com/xshopai/admin-service.git
+cd admin-service
+npm install
 ```
 
----
+**2. Configure Environment**
+```bash
+# Copy environment template
+cp .env.example .env
 
-## API Endpoints
+# Edit .env - update these values:
+# USER_SERVICE_URL=http://localhost:1002/api/users
+# JWT_SECRET=your-secret-key-change-in-production
+```
 
-- `GET /admin/users` — List all users
-- `GET /admin/users/:id` — Get user by ID
-- `PATCH /admin/users/:id` — Update user profile/roles/status
-- `POST /admin/users/:id/password/change` — Change user password
-- `DELETE /admin/users/:id` — Delete user account
+**3. Initialize Dapr**
+```bash
+# First time only
+dapr init
+```
 
-All endpoints require a valid admin JWT in the `Authorization` header.
+**4. Run Service**
+```bash
+# Start with Dapr (recommended)
+npm run dev
 
----
+# Or use platform-specific scripts
+./run.sh       # Linux/Mac
+.\run.ps1      # Windows
+```
 
-## Contributing
+**5. Verify**
+```bash
+# Check health
+curl http://localhost:1003/health
 
-Contributions are welcome! Please open issues or submit pull requests.
+# Should return: {"status":"UP","service":"admin-service"...}
 
----
+# Via Dapr
+curl http://localhost:3503/v1.0/invoke/admin-service/method/health
+```
 
-## License
+### Common Commands
 
-MIT License
+```bash
+# Run tests
+npm test
 
----
+# Run with coverage
+npm run test:coverage
 
-## Contact
+# Lint code
+npm run lint
 
-For questions or support, reach out to the AIOutlet dev team.
+# Production mode
+npm start
+```
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [📖 Developer Guide](docs/DEVELOPER_GUIDE.md) | Local setup, debugging, daily workflows |
+| [📘 Technical Reference](docs/TECHNICAL.md) | Architecture, security, monitoring |
+| [🤝 Contributing](docs/CONTRIBUTING.md) | Contribution guidelines and workflow |
+
+**API Documentation**: See `src/routes/` for endpoint definitions and `tests/integration/` for API contract examples.
+
+## ⚙️ Configuration
+
+### Required Environment Variables
+
+```bash
+# Service
+NODE_ENV=development              # Environment: development, production, test
+PORT=1003                         # HTTP server port
+
+# External Services
+USER_SERVICE_URL=http://localhost:1002/api/users
+
+# Security
+JWT_SECRET=your-secret-key        # JWT signing secret (32+ characters)
+USER_SERVICE_SECRET=shared-secret # Shared secret for service-to-service auth
+
+# Dapr
+DAPR_HTTP_PORT=3503              # Dapr sidecar HTTP port
+DAPR_GRPC_PORT=50003             # Dapr sidecar gRPC port
+DAPR_APP_ID=admin-service        # Dapr application ID
+```
+
+See [.env.example](.env.example) for complete configuration options.
+
+## ✨ Key Features
+
+- User management (list, view, update, delete)
+- Role and permission administration
+- User status management (activate/deactivate)
+- Admin-initiated password changes
+- Bulk user operations
+- Event publishing for audit trails
+- Comprehensive authorization checks
+- Structured logging for compliance
+
+## 🏗️ Architecture
+
+**Publisher-Only Pattern**: Following Amazon's admin portal pattern, this service:
+- Provides REST API endpoints for admin actions
+- Publishes events for audit/notification (`admin.user.updated`, `admin.user.deleted`)
+- Does NOT consume events - it's an action center, not an event responder
+- Forwards admin JWT to user-service for all privileged operations
+
+## 🔗 Related Services
+
+- [user-service](https://github.com/xshopai/user-service) - User profile management
+- [auth-service](https://github.com/xshopai/auth-service) - Authentication and JWT issuance
+- [audit-service](https://github.com/xshopai/audit-service) - Audit logging
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE)
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/xshopai/admin-service/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/xshopai/admin-service/discussions)
+- **Documentation**: [docs/](docs/)
