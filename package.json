@@ -1,7 +1,7 @@
 {
   "name": "admin-service",
   "version": "1.0.0",
-  "description": "Admin microservice for AIOutlet platform.",
+  "description": "Admin microservice for xShop.ai platform.",
   "main": "src/server.js",
   "type": "module",
   "directories": {

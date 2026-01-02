@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Admin Service is a critical administrative component of the AIOutlet platform that provides management capabilities for users, products, orders, and system configuration. This service handles highly sensitive administrative functions and requires strict security measures.
+The Admin Service is a critical administrative component of the xShop.ai platform that provides management capabilities for users, products, orders, and system configuration. This service handles highly sensitive administrative functions and requires strict security measures.
 
 ## Supported Versions
 
