@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Admin Service is a critical administrative component of the xShop.ai platform that provides management capabilities for users, products, orders, and system configuration. This service handles highly sensitive administrative functions and requires strict security measures.
+The Admin Service is a critical administrative component of the xshop.ai platform that provides management capabilities for users, products, orders, and system configuration. This service handles highly sensitive administrative functions and requires strict security measures.
 
 ## Supported Versions
 
@@ -151,7 +151,7 @@ If you discover a security vulnerability in the Admin Service, please follow res
 
 1. **Do NOT** open a public issue
 2. **Do NOT** discuss the vulnerability publicly
-3. **Email** our security team at: <security@aioutlet.com>
+3. **Email** our security team at: <security@xshopai.com>
 
 ### Report Should Include
 
@@ -243,7 +243,7 @@ The Admin Service adheres to:
 
 For security-related questions or concerns:
 
-- **Email**: <security@aioutlet.com>
+- **Email**: <security@xshopai.com>
 - **Emergency**: Include "URGENT ADMIN SECURITY" in subject line
 - **Admin Security Issues**: Priority escalation for administrative vulnerabilities
 

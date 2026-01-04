@@ -71,7 +71,7 @@ class DaprSecretManager {
       algorithm: process.env.JWT_ALGORITHM || 'HS256',
       expiration: parseInt(process.env.JWT_EXPIRATION || '3600', 10),
       issuer: process.env.JWT_ISSUER || 'auth-service',
-      audience: process.env.JWT_AUDIENCE || 'aioutlet-platform',
+      audience: process.env.JWT_AUDIENCE || 'xshopai-platform',
     };
   }
 }

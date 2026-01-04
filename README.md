@@ -1,6 +1,6 @@
 # 👥 Admin Service
 
-Administrative operations microservice for xShop.ai - handles privileged user management, role administration, and system-wide administrative operations.
+Administrative operations microservice for xshop.ai - handles privileged user management, role administration, and system-wide administrative operations.
 
 ## 🚀 Quick Start
 

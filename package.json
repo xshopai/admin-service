@@ -1,7 +1,7 @@
 {
   "name": "admin-service",
   "version": "1.0.0",
-  "description": "Admin microservice for xShop.ai platform.",
+  "description": "Admin microservice for xshop.ai platform.",
   "main": "src/server.js",
   "type": "module",
   "directories": {
@@ -17,10 +17,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aioutlet/admin-service.git"
+    "url": "git+https://github.com/xshopai/admin-service.git"
   },
   "keywords": [
-    "aioutlet",
+    "xshopai",
     "microservice",
     "node",
     "express",
@@ -29,9 +29,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/aioutlet/admin-service/issues"
+    "url": "https://github.com/xshopai/admin-service/issues"
   },
-  "homepage": "https://github.com/aioutlet/admin-service#readme",
+  "homepage": "https://github.com/xshopai/admin-service#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.27.2",
     "babel-jest": "^30.0.2",

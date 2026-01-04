@@ -20,7 +20,7 @@ services:
       - ORDER_SERVICE_URL=http://order-service:1003
       - AUTH_SERVICE_URL=http://auth-service:1004
     networks:
-      - aioutlet-network
+      - xshopai-network
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:1011/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
       interval: 30s
@@ -29,5 +29,5 @@ services:
       start_period: 40s
 
 networks:
-  aioutlet-network:
+  xshopai-network:
     external: true
