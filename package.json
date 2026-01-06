@@ -1,7 +1,7 @@
 {
   "name": "admin-service",
   "version": "1.0.0",
-  "description": "Admin microservice for xshop.ai platform.",
+  "description": "Admin microservice for xshopai platform.",
   "main": "src/server.js",
   "type": "module",
   "directories": {
