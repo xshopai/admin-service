@@ -24,7 +24,7 @@ npm install
 cp .env.example .env
 
 # Edit .env - update these values:
-# USER_SERVICE_URL=http://localhost:1002/api/users
+# USER_SERVICE_URL=http://localhost:8002/api/users
 # JWT_SECRET=your-secret-key-change-in-production
 ```
 
@@ -91,7 +91,7 @@ NODE_ENV=development              # Environment: development, production, test
 PORT=1003                         # HTTP server port
 
 # External Services
-USER_SERVICE_URL=http://localhost:1002/api/users
+USER_SERVICE_URL=http://localhost:8002/api/users
 
 # Security
 JWT_SECRET=your-secret-key        # JWT signing secret (32+ characters)
