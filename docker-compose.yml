@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   # Admin Service (no dedicated database - uses other services via APIs)
@@ -18,11 +18,17 @@ services:
       - USER_SERVICE_URL=http://user-service:1001
       - PRODUCT_SERVICE_URL=http://product-service:1002
       - ORDER_SERVICE_URL=http://order-service:1003
-      - AUTH_SERVICE_URL=http://auth-service:1004
+      - AUTH_SERVICE_URL=http://auth-service:8003
     networks:
       - xshopai-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:1011/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:1011/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
