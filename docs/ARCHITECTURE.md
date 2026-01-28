@@ -633,20 +633,21 @@ scopes:
 
 ### 5.1 Environment Variables
 
-| Variable            | Description                          | Default                     | Required |
-| ------------------- | ------------------------------------ | --------------------------- | -------- |
-| `NODE_ENV`          | Environment (development/production) | `development`               | No       |
-| `PORT`              | HTTP server port                     | `1003`                      | No       |
-| `NAME`              | Service name                         | `admin-service`             | No       |
-| `VERSION`           | Service version                      | `1.0.0`                     | No       |
-| `LOG_LEVEL`         | Logging level                        | `info`                      | No       |
-| `JWT_SECRET`        | JWT signing secret                   | -                           | Yes      |
-| `USER_SERVICE_URL`  | User service base URL                | `http://localhost:8002/api` | Yes      |
-| `ORDER_SERVICE_URL` | Order service base URL               | `http://localhost:8006/api` | Yes      |
-| `DAPR_HTTP_PORT`    | Dapr sidecar HTTP port               | `3503`                      | No       |
-| `DAPR_GRPC_PORT`    | Dapr sidecar gRPC port               | `50003`                     | No       |
-| `DAPR_APP_ID`       | Dapr application ID                  | `admin-service`             | No       |
-| `DAPR_PUBSUB_NAME`  | Dapr pub/sub component name          | `event-bus`                 | No       |
+| Variable                | Description                          | Default                     | Required |
+| ----------------------- | ------------------------------------ | --------------------------- | -------- |
+| `NODE_ENV`              | Environment (development/production) | `development`               | No       |
+| `PORT`                  | HTTP server port                     | `1003`                      | No       |
+| `NAME`                  | Service name                         | `admin-service`             | No       |
+| `VERSION`               | Service version                      | `1.0.0`                     | No       |
+| `LOG_LEVEL`             | Logging level                        | `info`                      | No       |
+| `JWT_SECRET`            | JWT signing secret                   | -                           | Yes      |
+| `USER_SERVICE_URL`      | User service base URL                | `http://localhost:8002/api` | Yes      |
+| `ORDER_SERVICE_URL`     | Order service base URL               | `http://localhost:8006/api` | Yes      |
+| `DAPR_HTTP_PORT`        | Dapr sidecar HTTP port               | `3500`                      | No       |
+| `DAPR_GRPC_PORT`        | Dapr sidecar gRPC port               | `50001`                     | No       |
+| `DAPR_APP_ID`           | Dapr application ID                  | `admin-service`             | No       |
+| `DAPR_PUBSUB_NAME`      | Dapr pub/sub component name          | `pubsub`                    | No       |
+| `DAPR_SECRETSTORE_NAME` | Dapr secret store component name     | `secretstore`               | No       |
 
 ---
 

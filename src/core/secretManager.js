@@ -9,8 +9,8 @@ import logger from './logger.js';
 class DaprSecretManager {
   constructor() {
     this.daprHost = process.env.DAPR_HOST || '127.0.0.1';
-    this.daprPort = process.env.DAPR_HTTP_PORT || '3503';
-    this.secretStoreName = 'secret-store';
+    this.daprPort = process.env.DAPR_HTTP_PORT || '3500';
+    this.secretStoreName = 'secretstore';
 
     this.client = new DaprClient({
       daprHost: this.daprHost,

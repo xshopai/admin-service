@@ -234,8 +234,8 @@ JWT_SECRET=your-secret-key        # JWT signing secret (32+ characters)
 USER_SERVICE_SECRET=shared-secret # Shared secret for service-to-service auth
 
 # Dapr
-DAPR_HTTP_PORT=3503              # Dapr sidecar HTTP port
-DAPR_GRPC_PORT=50003             # Dapr sidecar gRPC port
+DAPR_HTTP_PORT=3500
+DAPR_GRPC_PORT=50001             # Dapr sidecar gRPC port
 DAPR_APP_ID=admin-service        # Dapr application ID
 ```
 

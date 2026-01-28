@@ -268,7 +268,8 @@ az containerapp create \
   --env-vars \
     "NODE_ENV=production" \
     "PORT=1003" \
-    "DAPR_PUBSUB_NAME=admin-pubsub" \
+    "DAPR_PUBSUB_NAME=pubsub" \
+    "DAPR_SECRETSTORE_NAME=secretstore" \
     "DAPR_HTTP_PORT=3500" \
     "USER_SERVICE_URL=https://$USER_SERVICE_URL" \
     "ORDER_SERVICE_URL=https://$ORDER_SERVICE_URL" \
@@ -285,7 +286,7 @@ az containerapp create \
 az containerapp env dapr-component set \
   --name $ENVIRONMENT_NAME \
   --resource-group $RESOURCE_GROUP \
-  --dapr-component-name admin-pubsub \
+  --dapr-component-name pubsub \
   --yaml .dapr/components/dapr-servicebus-component.yaml
 ```
 

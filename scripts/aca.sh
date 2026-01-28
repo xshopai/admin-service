@@ -115,6 +115,9 @@ else
             "MONGODB_URI=secretref:cosmos-conn" \
             "MONGODB_DATABASE=$DATABASE_NAME" \
             "LOG_LEVEL=info" \
+            "DAPR_HTTP_PORT=3500" \
+            "DAPR_GRPC_PORT=50001" \
+            "DAPR_PUBSUB_NAME=pubsub" \
         --output none
     print_success "Container app created"
 fi

@@ -88,13 +88,13 @@ const validationRules = {
     required: false,
     validator: isValidPort,
     errorMessage: 'DAPR_HTTP_PORT must be a valid port number',
-    default: '3510',
+    default: '3500',
   },
   DAPR_GRPC_PORT: {
     required: false,
     validator: isValidPort,
     errorMessage: 'DAPR_GRPC_PORT must be a valid port number',
-    default: '50010',
+    default: '50001',
   },
 
   // Security Configuration

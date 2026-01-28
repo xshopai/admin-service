@@ -2,7 +2,7 @@ import { DaprClient, HttpMethod } from '@dapr/dapr';
 import logger from '../core/logger.js';
 
 const daprHost = process.env.DAPR_HOST || 'localhost';
-const daprPort = process.env.DAPR_HTTP_PORT || '3503'; // admin-service's Dapr HTTP port
+const daprPort = process.env.DAPR_HTTP_PORT || '3500'; // admin-service's Dapr HTTP port
 const ORDER_SERVICE_APP_ID = 'order-service';
 
 const daprClient = new DaprClient({ daprHost, daprPort });
@@ -12,13 +12,9 @@ const daprClient = new DaprClient({ daprHost, daprPort });
  */
 export async function fetchAllOrders(token) {
   try {
-    const response = await daprClient.invoker.invoke(
-      ORDER_SERVICE_APP_ID,
-      '/api/admin/orders',
-      HttpMethod.GET,
-      null,
-      { headers: { authorization: `Bearer ${token}` } }
-    );
+    const response = await daprClient.invoker.invoke(ORDER_SERVICE_APP_ID, '/api/admin/orders', HttpMethod.GET, null, {
+      headers: { authorization: `Bearer ${token}` },
+    });
     return response;
   } catch (error) {
     logger.error('Failed to fetch all orders from order-service', { error: error.message });
@@ -37,7 +33,7 @@ export async function fetchOrdersPaged(token, queryParams) {
       `/api/admin/orders/paged${queryString}`,
       HttpMethod.GET,
       null,
-      { headers: { authorization: `Bearer ${token}` } }
+      { headers: { authorization: `Bearer ${token}` } },
     );
     return response;
   } catch (error) {
@@ -56,7 +52,7 @@ export async function fetchOrderById(orderId, token) {
       `/api/admin/orders/${orderId}`,
       HttpMethod.GET,
       null,
-      { headers: { authorization: `Bearer ${token}` } }
+      { headers: { authorization: `Bearer ${token}` } },
     );
     return response;
   } catch (error) {
@@ -78,7 +74,7 @@ export async function updateOrderStatus(orderId, data, token) {
       `/api/admin/orders/${orderId}/status`,
       HttpMethod.PUT,
       data,
-      { headers: { authorization: `Bearer ${token}` } }
+      { headers: { authorization: `Bearer ${token}` } },
     );
     return response;
   } catch (error) {
@@ -95,13 +91,9 @@ export async function updateOrderStatus(orderId, data, token) {
  */
 export async function deleteOrderById(orderId, token) {
   try {
-    await daprClient.invoker.invoke(
-      ORDER_SERVICE_APP_ID,
-      `/api/admin/orders/${orderId}`,
-      HttpMethod.DELETE,
-      null,
-      { headers: { authorization: `Bearer ${token}` } }
-    );
+    await daprClient.invoker.invoke(ORDER_SERVICE_APP_ID, `/api/admin/orders/${orderId}`, HttpMethod.DELETE, null, {
+      headers: { authorization: `Bearer ${token}` },
+    });
   } catch (error) {
     logger.error('Failed to delete order from order-service', { orderId, error: error.message });
     throw error;
@@ -120,13 +112,9 @@ export async function fetchOrderStats(token, options = {}) {
     const queryString = params.toString();
     const endpoint = queryString ? `/api/admin/orders/stats?${queryString}` : '/api/admin/orders/stats';
 
-    const response = await daprClient.invoker.invoke(
-      ORDER_SERVICE_APP_ID,
-      endpoint,
-      HttpMethod.GET,
-      null,
-      { headers: { authorization: `Bearer ${token}` } }
-    );
+    const response = await daprClient.invoker.invoke(ORDER_SERVICE_APP_ID, endpoint, HttpMethod.GET, null, {
+      headers: { authorization: `Bearer ${token}` },
+    });
     return response;
   } catch (error) {
     logger.error('Failed to fetch order stats from order-service', { error: error.message });

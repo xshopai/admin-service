@@ -157,8 +157,8 @@ LOG_FILE_PATH=./logs/admin-service.log
 
 # Dapr Configuration
 DAPR_HOST=localhost
-DAPR_HTTP_PORT=3503
-DAPR_GRPC_PORT=50003
+DAPR_HTTP_PORT=3500
+DAPR_GRPC_PORT=50001
 DAPR_APP_ID=admin-service
 DAPR_PUBSUB_NAME=event-bus
 
@@ -366,8 +366,8 @@ Add to `.vscode/launch.json`:
       "program": "${workspaceFolder}/src/server.js",
       "envFile": "${workspaceFolder}/.env",
       "env": {
-        "DAPR_HTTP_PORT": "3503",
-        "DAPR_GRPC_PORT": "50003",
+        "DAPR_HTTP_PORT": "3500",
+        "DAPR_GRPC_PORT": "50001",
         "DAPR_ENABLED": "true"
       },
       "console": "integratedTerminal",
