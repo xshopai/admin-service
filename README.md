@@ -262,7 +262,7 @@ npm run test:e2e                  # Run e2e tests
 
 # 🔍 Health Check
 curl http://localhost:1003/health
-curl http://localhost:3503/v1.0/invoke/admin-service/method/health
+curl http://localhost:3500/v1.0/invoke/admin-service/method/health
 ```
 
 ---

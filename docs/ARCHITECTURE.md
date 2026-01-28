@@ -77,8 +77,10 @@ The Admin Service is a privileged microservice within the xshopai e-commerce pla
 | API Docs       | OpenAPI/Swagger                                                |
 | Messaging      | Dapr Pub/Sub (RabbitMQ backend)                                |
 | Main Port      | 1003                                                           |
-| Dapr HTTP Port | 3503                                                           |
-| Dapr gRPC Port | 50003                                                          |
+| Dapr HTTP Port | 3500                                                           |
+| Dapr gRPC Port | 50001                                                          |
+
+> **Note:** All services now use the standard Dapr ports (3500 for HTTP, 50001 for gRPC). This simplifies configuration and works consistently whether running via Docker Compose or individual service runs.
 
 ### 1.4 Directory Structure
 
@@ -183,7 +185,7 @@ flowchart TB
     subgraph Infrastructure["<b>⚙️ INFRASTRUCTURE</b>"]
         direction TB
         RabbitMQ[("🐰 RabbitMQ<br/>Message Broker<br/>Port: 5672")]
-        Dapr["📡 Dapr Sidecar<br/>HTTP: 3503"]
+        Dapr["📡 Dapr Sidecar<br/>HTTP: 3500"]
     end
 
     %% User flows
@@ -290,7 +292,7 @@ flowchart TB
 
 | Component           | Purpose                | Port/Connection         |
 | ------------------- | ---------------------- | ----------------------- |
-| Dapr Sidecar        | Pub/sub messaging      | HTTP: 3503, gRPC: 50003 |
+| Dapr Sidecar        | Pub/sub messaging      | HTTP: 3500, gRPC: 50001 |
 | RabbitMQ (via Dapr) | Message broker backend | Abstracted by Dapr      |
 
 ---

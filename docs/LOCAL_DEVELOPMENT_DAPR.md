@@ -143,6 +143,8 @@ Copy-Item .env.dapr .env
 
 The `.env.dapr` file contains:
 
+> **Note:** All services now use the standard Dapr ports (3500 for HTTP, 50001 for gRPC). This simplifies configuration and works consistently whether running via Docker Compose or individual service runs.
+
 ```bash
 NODE_ENV=development
 PORT=1003
@@ -220,15 +222,15 @@ Admin Service proxies to these services:
 ```powershell
 # Terminal 1: Start User Service (with Dapr)
 cd C:\gh\xshopai\user-service
-dapr run --app-id user-service --app-port 8002 --dapr-http-port 3502 --resources-path .dapr/components -- npm run dev
+dapr run --app-id user-service --app-port 8002 --dapr-http-port 3500 --resources-path .dapr/components -- npm run dev
 
 # Terminal 2: Start Order Service (with Dapr)
 cd C:\gh\xshopai\order-service
-dapr run --app-id order-service --app-port 8006 --dapr-http-port 3506 --resources-path .dapr/components -- dotnet run
+dapr run --app-id order-service --app-port 8006 --dapr-http-port 3500 --resources-path .dapr/components -- dotnet run
 
 # Terminal 3: Start Audit Service (event consumer)
 cd C:\gh\xshopai\audit-service
-dapr run --app-id audit-service --app-port 8010 --dapr-http-port 3510 --resources-path .dapr/components -- npm run dev
+dapr run --app-id audit-service --app-port 8010 --dapr-http-port 3500 --resources-path .dapr/components -- npm run dev
 ```
 
 ---
@@ -249,8 +251,8 @@ dapr run --app-id audit-service --app-port 8010 --dapr-http-port 3510 --resource
 dapr run `
   --app-id admin-service `
   --app-port 1003 `
-  --dapr-http-port 3503 `
-  --dapr-grpc-port 50003 `
+  --dapr-http-port 3500 `
+  --dapr-grpc-port 50001 `
   --resources-path .dapr/components `
   --config .dapr/config.yaml `
   --log-level warn `
@@ -262,8 +264,8 @@ dapr run `
 dapr run \
   --app-id admin-service \
   --app-port 1003 \
-  --dapr-http-port 3503 \
-  --dapr-grpc-port 50003 \
+  --dapr-http-port 3500 \
+  --dapr-grpc-port 50001 \
   --resources-path .dapr/components \
   --config .dapr/config.yaml \
   --log-level warn \
@@ -279,8 +281,8 @@ dapr run \
 dapr run `
   --app-id admin-service `
   --app-port 1003 `
-  --dapr-http-port 3503 `
-  --dapr-grpc-port 50003 `
+  --dapr-http-port 3500 `
+  --dapr-grpc-port 50001 `
   --resources-path .dapr/components `
   --config .dapr/config.yaml `
   --log-level warn
@@ -303,7 +305,7 @@ dapr list
 
 # Expected output:
 # APP ID          HTTP PORT  GRPC PORT  APP PORT  COMMAND  AGE  CREATED
-# admin-service   3503       50003      1003      npm run  10s  2025-01-01 10:00:00
+# admin-service   3500       50001      1003      npm run  10s  2025-01-01 10:00:00
 ```
 
 ---
@@ -451,7 +453,7 @@ docker compose -f scripts/docker-compose/docker-compose.infrastructure.yml up ra
 ### Port Conflicts
 
 ```
-Error: listen EADDRINUSE :::3503
+Error: listen EADDRINUSE :::3500
 ```
 
 **Solution:**
@@ -493,8 +495,8 @@ dapr dashboard -p 9999
 | Port  | Service                |
 | ----- | ---------------------- |
 | 1003  | Admin Service (HTTP)   |
-| 3503  | Dapr Sidecar (HTTP)    |
-| 50003 | Dapr Sidecar (gRPC)    |
+| 3500  | Dapr Sidecar (HTTP)    |
+| 50001 | Dapr Sidecar (gRPC)    |
 | 5672  | RabbitMQ (AMQP)        |
 | 15672 | RabbitMQ Management UI |
 | 9411  | Zipkin Tracing UI      |
