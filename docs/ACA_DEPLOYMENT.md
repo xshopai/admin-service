@@ -327,9 +327,9 @@ az keyvault create \
   --resource-group $RESOURCE_GROUP \
   --location $LOCATION
 
-# Store secrets
-az keyvault secret set --vault-name $KV_NAME --name "jwt-secret" --value "<jwt-secret>"
-az keyvault secret set --vault-name $KV_NAME --name "jwt-public-key" --value "<jwt-public-key>"
+# Store secrets (use xshopai- prefix for platform secrets)
+az keyvault secret set --vault-name $KV_NAME --name "xshopai-jwt-secret" --value "<jwt-secret>"
+az keyvault secret set --vault-name $KV_NAME --name "xshopai-jwt-public-key" --value "<jwt-public-key>"
 
 # Grant Container App access to Key Vault
 # Enable managed identity first

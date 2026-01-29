@@ -38,6 +38,10 @@ APP_NAME="admin-service"
 APP_PORT=1013
 DATABASE_NAME="admin_db"
 
+# Container App name follows convention: ca-{service}-{env}-{suffix}
+# Note: For simplified deployments without suffix, we default to APP_NAME
+CONTAINER_APP_NAME="$APP_NAME"
+
 read -p "Proceed with deployment? (y/N): " confirm
 [[ ! "$confirm" =~ ^[Yy]$ ]] && exit 0
 
@@ -85,22 +89,23 @@ if ! az containerapp env show --name "$ENVIRONMENT_NAME" --resource-group "$RESO
         --output none
 fi
 
-if az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+if az containerapp show --name "$CONTAINER_APP_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
     az containerapp update \
-        --name "$APP_NAME" \
+        --name "$CONTAINER_APP_NAME" \
         --resource-group "$RESOURCE_GROUP" \
         --image "$IMAGE_TAG" \
         --output none
     print_success "Container app updated"
 else
     az containerapp create \
-        --name "$APP_NAME" \
+        --name "$CONTAINER_APP_NAME" \
+        --container-name "$APP_NAME" \
         --resource-group "$RESOURCE_GROUP" \
         --environment "$ENVIRONMENT_NAME" \
         --image "$IMAGE_TAG" \
         --registry-server "$ACR_LOGIN_SERVER" \
         --target-port "$APP_PORT" \
-        --ingress internal \
+        --ingress external \
         --min-replicas 1 \
         --max-replicas 5 \
         --cpu 0.5 \
@@ -123,4 +128,4 @@ else
 fi
 
 print_header "Deployment Complete!"
-echo -e "${GREEN}Admin Service deployed! Dapr App ID: $APP_NAME${NC}"
+echo -e "${GREEN}Admin Service deployed! Dapr App ID: $CONTAINER_APP_NAME${NC}"
