@@ -1,131 +1,402 @@
 #!/bin/bash
+
 # ============================================================================
 # Azure Container Apps Deployment Script for Admin Service
+# ============================================================================
+# This script deploys the Admin Service to Azure Container Apps.
+# 
+# PREREQUISITE: Run the infrastructure deployment script first:
+#   cd infrastructure/azure/aca/scripts
+#   ./deploy-infra.sh
+#
+# The infrastructure script creates all shared resources:
+#   - Resource Group, ACR, Container Apps Environment
+#   - Service Bus, Redis, Cosmos DB, MySQL, Key Vault
+#   - Dapr components (pubsub, statestore, secretstore)
+#
+# NOTE: Admin Service is a gateway/orchestration service that:
+#   - Does NOT have its own database
+#   - Calls other services (user-service, product-service, etc.) via Dapr
+#   - Requires auth-service to be deployed for JWT validation
 # ============================================================================
 
 set -e
 
-# Colors
+# -----------------------------------------------------------------------------
+# Colors for output
+# -----------------------------------------------------------------------------
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-print_header() { echo -e "\n${BLUE}============================================================================${NC}"; echo -e "${BLUE}$1${NC}"; echo -e "${BLUE}============================================================================${NC}\n"; }
-print_success() { echo -e "${GREEN}✓ $1${NC}"; }
-print_info() { echo -e "${BLUE}ℹ $1${NC}"; }
-print_error() { echo -e "${RED}✗ $1${NC}"; }
+# Print functions
+print_header() {
+    echo -e "\n${BLUE}==============================================================================${NC}"
+    echo -e "${BLUE}$1${NC}"
+    echo -e "${BLUE}==============================================================================${NC}\n"
+}
 
-read_with_default() { read -p "$1 [$2]: " value; echo "${value:-$2}"; }
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
 
-# Prerequisites
+print_warning() {
+    echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}✗ $1${NC}"
+}
+
+print_info() {
+    echo -e "${CYAN}ℹ $1${NC}"
+}
+
+# ============================================================================
+# Prerequisites Check
+# ============================================================================
 print_header "Checking Prerequisites"
-command -v az &>/dev/null || { print_error "Azure CLI not installed"; exit 1; }
-print_success "Azure CLI installed"
-command -v docker &>/dev/null || { print_error "Docker not installed"; exit 1; }
-print_success "Docker installed"
-az account show &>/dev/null || az login
 
-# Configuration
-print_header "Azure Configuration"
-RESOURCE_GROUP=$(read_with_default "Enter Resource Group name" "rg-xshopai-aca")
-LOCATION=$(read_with_default "Enter Azure Location" "swedencentral")
-ACR_NAME=$(read_with_default "Enter Azure Container Registry name" "acrxshopaiaca")
-ENVIRONMENT_NAME=$(read_with_default "Enter Container Apps Environment name" "cae-xshopai-aca")
-COSMOS_ACCOUNT=$(read_with_default "Enter Cosmos DB account name" "cosmos-xshopai-aca")
-
-APP_NAME="admin-service"
-APP_PORT=1013
-DATABASE_NAME="admin_db"
-
-# Container App name follows convention: ca-{service}-{env}-{suffix}
-# Note: For simplified deployments without suffix, we default to APP_NAME
-CONTAINER_APP_NAME="$APP_NAME"
-
-read -p "Proceed with deployment? (y/N): " confirm
-[[ ! "$confirm" =~ ^[Yy]$ ]] && exit 0
-
-# Cosmos DB
-print_header "Setting Up Cosmos DB"
-if az cosmosdb show --name "$COSMOS_ACCOUNT" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
-    print_info "Cosmos DB account exists"
-else
-    az cosmosdb create \
-        --name "$COSMOS_ACCOUNT" \
-        --resource-group "$RESOURCE_GROUP" \
-        --kind MongoDB \
-        --capabilities EnableMongo \
-        --default-consistency-level Session \
-        --output none
-    print_success "Cosmos DB account created"
+# Check Azure CLI
+if ! command -v az &> /dev/null; then
+    print_error "Azure CLI is not installed. Please install it from: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli"
+    exit 1
 fi
+print_success "Azure CLI is installed"
 
-COSMOS_CONNECTION_STRING=$(az cosmosdb keys list \
-    --name "$COSMOS_ACCOUNT" \
-    --resource-group "$RESOURCE_GROUP" \
-    --type connection-strings \
-    --query "connectionStrings[0].connectionString" -o tsv)
+# Check Docker
+if ! command -v docker &> /dev/null; then
+    print_error "Docker is not installed. Please install Docker first."
+    exit 1
+fi
+print_success "Docker is installed"
 
-# Build and Push
-print_header "Building and Deploying"
-ACR_LOGIN_SERVER=$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)
-az acr login --name "$ACR_NAME"
+# Check if logged into Azure
+if ! az account show &> /dev/null; then
+    print_warning "Not logged into Azure. Initiating login..."
+    az login
+fi
+print_success "Logged into Azure"
 
+# ============================================================================
+# Configuration
+# ============================================================================
+print_header "Configuration"
+
+# Service-specific configuration
+SERVICE_NAME="admin-service"
+SERVICE_VERSION="1.0.0"
+APP_PORT=8003
+PROJECT_NAME="xshopai"
+
+# Dapr configuration for Azure Container Apps
+# In ACA, Dapr sidecar ALWAYS runs on port 3500 (HTTP) and 50001 (gRPC)
+# (different from local dev where each service has unique ports per PORT_CONFIGURATION.md)
+DAPR_HTTP_PORT=3500
+DAPR_GRPC_PORT=50001
+DAPR_PUBSUB_NAME="pubsub"
+
+# Get script directory and service directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_DIR="$(dirname "$SCRIPT_DIR")"
+
+# ============================================================================
+# Environment Selection
+# ============================================================================
+echo -e "${CYAN}Available Environments:${NC}"
+echo "   dev     - Development environment"
+echo "   prod    - Production environment"
+echo ""
+
+read -p "Enter environment (dev/prod) [dev]: " ENVIRONMENT
+ENVIRONMENT="${ENVIRONMENT:-dev}"
+
+if [[ ! "$ENVIRONMENT" =~ ^(dev|prod)$ ]]; then
+    print_error "Invalid environment: $ENVIRONMENT"
+    echo "   Valid values: dev, prod"
+    exit 1
+fi
+print_success "Environment: $ENVIRONMENT"
+
+# Set environment-specific variables
+case "$ENVIRONMENT" in
+    dev)
+        NODE_ENV="development"
+        LOG_LEVEL="debug"
+        ;;
+    prod)
+        NODE_ENV="production"
+        LOG_LEVEL="warn"
+        ;;
+esac
+
+# ============================================================================
+# Suffix Configuration
+# ============================================================================
+print_header "Infrastructure Configuration"
+
+echo -e "${CYAN}The suffix was set during infrastructure deployment.${NC}"
+echo "You can find it by running:"
+echo -e "   ${BLUE}az group list --query \"[?starts_with(name, 'rg-xshopai-$ENVIRONMENT')].{Name:name, Suffix:tags.suffix}\" -o table${NC}"
+echo ""
+
+read -p "Enter the infrastructure suffix: " SUFFIX
+
+if [ -z "$SUFFIX" ]; then
+    print_error "Suffix is required. Please run the infrastructure deployment first."
+    exit 1
+fi
+
+# Validate suffix format
+if [[ ! "$SUFFIX" =~ ^[a-z0-9]{3,6}$ ]]; then
+    print_error "Invalid suffix format: $SUFFIX"
+    echo "   Suffix must be 3-6 lowercase alphanumeric characters."
+    exit 1
+fi
+print_success "Using suffix: $SUFFIX"
+
+# ============================================================================
+# Derive Resource Names from Infrastructure
+# ============================================================================
+# These names must match what was created by deploy-infra.sh
+RESOURCE_GROUP="rg-${PROJECT_NAME}-${ENVIRONMENT}-${SUFFIX}"
+ACR_NAME="${PROJECT_NAME}${ENVIRONMENT}${SUFFIX}"
+CONTAINER_ENV="cae-${PROJECT_NAME}-${ENVIRONMENT}-${SUFFIX}"
+KEY_VAULT="kv-${PROJECT_NAME}-${ENVIRONMENT}-${SUFFIX}"
+MANAGED_IDENTITY="id-${PROJECT_NAME}-${ENVIRONMENT}-${SUFFIX}"
+
+# Container App name follows convention: ca-{service}-{env}-{suffix}
+CONTAINER_APP_NAME="ca-${SERVICE_NAME}-${ENVIRONMENT}-${SUFFIX}"
+
+print_info "Derived resource names:"
+echo "   Resource Group:      $RESOURCE_GROUP"
+echo "   Container Registry:  $ACR_NAME"
+echo "   Container Env:       $CONTAINER_ENV"
+echo "   Container App:       $CONTAINER_APP_NAME"
+echo "   Key Vault:           $KEY_VAULT"
+echo ""
+
+# ============================================================================
+# Verify Infrastructure Exists
+# ============================================================================
+print_header "Verifying Infrastructure"
+
+# Check Resource Group
+if ! az group show --name "$RESOURCE_GROUP" &> /dev/null; then
+    print_error "Resource group '$RESOURCE_GROUP' does not exist."
+    echo ""
+    echo "Please run the infrastructure deployment first:"
+    echo -e "   ${BLUE}cd infrastructure/azure/aca/scripts${NC}"
+    echo -e "   ${BLUE}./deploy-infra.sh${NC}"
+    exit 1
+fi
+print_success "Resource Group exists: $RESOURCE_GROUP"
+
+# Check ACR
+if ! az acr show --name "$ACR_NAME" &> /dev/null; then
+    print_error "Container Registry '$ACR_NAME' does not exist."
+    exit 1
+fi
+ACR_LOGIN_SERVER=$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)
+print_success "Container Registry exists: $ACR_LOGIN_SERVER"
+
+# Check Container Apps Environment
+if ! az containerapp env show --name "$CONTAINER_ENV" --resource-group "$RESOURCE_GROUP" &> /dev/null; then
+    print_error "Container Apps Environment '$CONTAINER_ENV' does not exist."
+    exit 1
+fi
+print_success "Container Apps Environment exists: $CONTAINER_ENV"
+
+# Get Managed Identity ID
+# Note: MSYS_NO_PATHCONV=1 prevents Git Bash from converting /subscriptions/... paths on Windows
+IDENTITY_ID=$(MSYS_NO_PATHCONV=1 az identity show --name "$MANAGED_IDENTITY" --resource-group "$RESOURCE_GROUP" --query id -o tsv 2>/dev/null || echo "")
+if [ -z "$IDENTITY_ID" ]; then
+    print_warning "Managed Identity not found, will deploy without it"
+else
+    print_success "Managed Identity exists: $MANAGED_IDENTITY"
+fi
+
+# ============================================================================
+# Confirmation
+# ============================================================================
+print_header "Deployment Configuration Summary"
+
+echo -e "${CYAN}Environment:${NC}          $ENVIRONMENT"
+echo -e "${CYAN}Suffix:${NC}               $SUFFIX"
+echo -e "${CYAN}Resource Group:${NC}       $RESOURCE_GROUP"
+echo -e "${CYAN}Container Registry:${NC}   $ACR_LOGIN_SERVER"
+echo -e "${CYAN}Container Env:${NC}        $CONTAINER_ENV"
+echo -e "${CYAN}Key Vault:${NC}            $KEY_VAULT"
+echo ""
+echo -e "${CYAN}Service Configuration:${NC}"
+echo -e "   Service Name:      $SERVICE_NAME"
+echo -e "   Service Version:   $SERVICE_VERSION"
+echo -e "   App Port:          $APP_PORT"
+echo -e "   NODE_ENV:          $NODE_ENV"
+echo -e "   LOG_LEVEL:         $LOG_LEVEL"
+echo -e "   Dapr HTTP Port:    $DAPR_HTTP_PORT"
+echo -e "   Dapr PubSub Name:  $DAPR_PUBSUB_NAME"
+echo ""
+echo -e "${CYAN}Dapr Service Invocation:${NC}"
+echo -e "   user-service:      via Dapr"
+echo -e "   product-service:   via Dapr"
+echo -e "   inventory-service: via Dapr"
+echo -e "   auth-service:      via Dapr"
+echo ""
+
+read -p "Do you want to proceed with deployment? (y/N): " CONFIRM
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    print_warning "Deployment cancelled by user"
+    exit 0
+fi
+
+# ============================================================================
+# Step 1: Build and Push Container Image
+# ============================================================================
+print_header "Step 1: Building and Pushing Container Image"
+
+# Login to ACR
+print_info "Logging into ACR..."
+az acr login --name "$ACR_NAME"
+print_success "Logged into ACR"
+
+# Navigate to service directory
 cd "$SERVICE_DIR"
 
-IMAGE_TAG="${ACR_LOGIN_SERVER}/${APP_NAME}:latest"
-docker build -t "$IMAGE_TAG" .
+# Build Docker image
+print_info "Building Docker image..."
+docker build -t "$SERVICE_NAME:latest" .
+print_success "Docker image built"
+
+# Tag and push
+IMAGE_TAG="$ACR_LOGIN_SERVER/$SERVICE_NAME:latest"
+docker tag "$SERVICE_NAME:latest" "$IMAGE_TAG"
+print_info "Pushing image to ACR..."
 docker push "$IMAGE_TAG"
 print_success "Image pushed: $IMAGE_TAG"
 
-# Container App
-if ! az containerapp env show --name "$ENVIRONMENT_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
-    az containerapp env create \
-        --name "$ENVIRONMENT_NAME" \
-        --resource-group "$RESOURCE_GROUP" \
-        --location "$LOCATION" \
-        --output none
-fi
+# ============================================================================
+# Step 2: Deploy Container App
+# ============================================================================
+print_header "Step 2: Deploying Container App"
 
-if az containerapp show --name "$CONTAINER_APP_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+# Get ACR credentials
+ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
+
+# Build environment variables
+# Admin service calls other services via Dapr - no database needed
+ENV_VARS=("NODE_ENV=$NODE_ENV")
+ENV_VARS+=("NAME=$SERVICE_NAME")
+ENV_VARS+=("VERSION=$SERVICE_VERSION")
+ENV_VARS+=("PORT=$APP_PORT")
+ENV_VARS+=("DAPR_HTTP_PORT=$DAPR_HTTP_PORT")
+ENV_VARS+=("DAPR_PUBSUB_NAME=$DAPR_PUBSUB_NAME")
+ENV_VARS+=("LOG_LEVEL=$LOG_LEVEL")
+# Dapr app IDs for service invocation
+ENV_VARS+=("DAPR_USER_SERVICE_APP_ID=user-service")
+ENV_VARS+=("DAPR_PRODUCT_SERVICE_APP_ID=product-service")
+ENV_VARS+=("DAPR_INVENTORY_SERVICE_APP_ID=inventory-service")
+ENV_VARS+=("DAPR_AUTH_SERVICE_APP_ID=auth-service")
+
+# Check if container app exists
+if az containerapp show --name "$CONTAINER_APP_NAME" --resource-group "$RESOURCE_GROUP" &> /dev/null; then
+    print_info "Container app '$CONTAINER_APP_NAME' exists, updating..."
     az containerapp update \
         --name "$CONTAINER_APP_NAME" \
         --resource-group "$RESOURCE_GROUP" \
         --image "$IMAGE_TAG" \
+        --set-env-vars "${ENV_VARS[@]}" \
         --output none
     print_success "Container app updated"
 else
-    az containerapp create \
+    print_info "Creating container app '$CONTAINER_APP_NAME'..."
+    
+    # Build the create command
+    # Note: MSYS_NO_PATHCONV=1 prevents Git Bash from converting /subscriptions/... paths on Windows
+    MSYS_NO_PATHCONV=1 az containerapp create \
         --name "$CONTAINER_APP_NAME" \
-        --container-name "$APP_NAME" \
+        --container-name "$SERVICE_NAME" \
         --resource-group "$RESOURCE_GROUP" \
-        --environment "$ENVIRONMENT_NAME" \
+        --environment "$CONTAINER_ENV" \
         --image "$IMAGE_TAG" \
         --registry-server "$ACR_LOGIN_SERVER" \
-        --target-port "$APP_PORT" \
+        --registry-username "$ACR_NAME" \
+        --registry-password "$ACR_PASSWORD" \
+        --target-port $APP_PORT \
         --ingress external \
         --min-replicas 1 \
         --max-replicas 5 \
         --cpu 0.5 \
-        --memory 1Gi \
+        --memory 1.0Gi \
         --enable-dapr \
-        --dapr-app-id "$APP_NAME" \
-        --dapr-app-port "$APP_PORT" \
-        --secrets "cosmos-conn=$COSMOS_CONNECTION_STRING" \
-        --env-vars \
-            "PORT=$APP_PORT" \
-            "NODE_ENV=production" \
-            "MONGODB_URI=secretref:cosmos-conn" \
-            "MONGODB_DATABASE=$DATABASE_NAME" \
-            "LOG_LEVEL=info" \
-            "DAPR_HTTP_PORT=3500" \
-            "DAPR_GRPC_PORT=50001" \
-            "DAPR_PUBSUB_NAME=pubsub" \
+        --dapr-app-id "$SERVICE_NAME" \
+        --dapr-app-port $APP_PORT \
+        --env-vars "${ENV_VARS[@]}" \
+        ${IDENTITY_ID:+--user-assigned "$IDENTITY_ID"} \
         --output none
+    
     print_success "Container app created"
 fi
 
-print_header "Deployment Complete!"
-echo -e "${GREEN}Admin Service deployed! Dapr App ID: $CONTAINER_APP_NAME${NC}"
+# ============================================================================
+# Step 3: Verify Deployment
+# ============================================================================
+print_header "Step 3: Verifying Deployment"
+
+APP_URL=$(az containerapp show \
+    --name "$CONTAINER_APP_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --query properties.configuration.ingress.fqdn \
+    -o tsv)
+
+print_success "Deployment completed!"
+echo ""
+print_info "Application URL: https://$APP_URL"
+print_info "Health Check:    https://$APP_URL/health/ready"
+echo ""
+
+# Test health endpoint
+print_info "Waiting for app to start (30s)..."
+sleep 30
+
+print_info "Testing health endpoint..."
+HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "https://$APP_URL/health/ready" 2>/dev/null || echo "000")
+
+if [ "$HTTP_STATUS" = "200" ]; then
+    print_success "Health check passed! (HTTP $HTTP_STATUS)"
+else
+    print_warning "Health check returned HTTP $HTTP_STATUS. The app may still be starting."
+fi
+
+# ============================================================================
+# Summary
+# ============================================================================
+print_header "Deployment Summary"
+
+echo -e "${GREEN}==============================================================================${NC}"
+echo -e "${GREEN}   ✅ $SERVICE_NAME DEPLOYED SUCCESSFULLY${NC}"
+echo -e "${GREEN}==============================================================================${NC}"
+echo ""
+echo -e "${CYAN}Application:${NC}"
+echo "   URL:              https://$APP_URL"
+echo "   Health:           https://$APP_URL/health/ready"
+echo ""
+echo -e "${CYAN}Infrastructure:${NC}"
+echo "   Resource Group:   $RESOURCE_GROUP"
+echo "   Environment:      $CONTAINER_ENV"
+echo "   Registry:         $ACR_LOGIN_SERVER"
+echo ""
+echo -e "${CYAN}Service Dependencies (via Dapr):${NC}"
+echo "   user-service:      Dapr app-id 'user-service'"
+echo "   product-service:   Dapr app-id 'product-service'"
+echo "   inventory-service: Dapr app-id 'inventory-service'"
+echo "   auth-service:      Dapr app-id 'auth-service'"
+echo ""
+echo -e "${CYAN}Useful Commands:${NC}"
+echo -e "   View logs:        ${BLUE}az containerapp logs show --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --follow${NC}"
+echo -e "   View Dapr logs:   ${BLUE}az containerapp logs show --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --container daprd --follow${NC}"
+echo -e "   Delete app:       ${BLUE}az containerapp delete --name $CONTAINER_APP_NAME --resource-group $RESOURCE_GROUP --yes${NC}"
+echo ""
