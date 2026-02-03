@@ -247,13 +247,6 @@ echo -e "   inventory-service: via Dapr"
 echo -e "   auth-service:      via Dapr"
 echo ""
 
-read -p "Do you want to proceed with deployment? (Y/n): " CONFIRM
-CONFIRM=${CONFIRM:-Y}
-if [[ "$CONFIRM" =~ ^[Nn]$ ]]; then
-    print_warning "Deployment cancelled by user"
-    exit 0
-fi
-
 # ============================================================================
 # Step 1: Build and Push Container Image
 # ============================================================================
