@@ -4,6 +4,9 @@
  * This prevents module initialization race conditions with dotenv
  */
 
+// Initialize OpenTelemetry FIRST (before any other imports)
+import './instrumentation.js';
+
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 

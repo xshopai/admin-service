@@ -8,10 +8,10 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --config ./.dapr/config.yaml --resources-path ./.dapr/components -- node src/server.js",
+    "start": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --resources-path ./.dapr/components -- node src/server.js",
     "start:prod": "node src/server.js",
-    "dev": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --config ./.dapr/config.yaml --resources-path ./.dapr/components -- nodemon src/server.js",
-    "debug": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --config ./.dapr/config.yaml --resources-path ./.dapr/components -- node --inspect=9229 src/server.js",
+    "dev": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --resources-path ./.dapr/components -- nodemon src/server.js",
+    "debug": "dapr run --app-id admin-service --app-port 8003 --dapr-http-port 3500 --dapr-grpc-port 50001 --log-level warn --resources-path ./.dapr/components -- node --inspect=9229 src/server.js",
     "test": "jest",
     "test:unit": "jest tests/unit",
     "test:integration": "jest tests/integration --runInBand",
@@ -43,6 +43,7 @@
     "nodemon": "^3.1.10"
   },
   "dependencies": {
+    "@azure/monitor-opentelemetry": "^1.7.1",
     "@dapr/dapr": "^3.5.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
