@@ -1,22 +1,19 @@
-#!/usr/bin/env bash
-# Run Admin Service with Dapr sidecar
-# Usage: ./run.sh
+#!/bin/bash
 
-echo -e "\033[0;32mStarting Admin Service with Dapr...\033[0m"
-echo -e "\033[0;36mService will be available at: http://localhost:8003\033[0m"
-echo -e "\033[0;36mDapr HTTP endpoint: http://localhost:3500\033[0m"
-echo -e "\033[0;36mDapr gRPC endpoint: localhost:50001\033[0m"
+# Admin Service - Run with Dapr
+
+echo "Starting Admin Service with Dapr..."
+echo "Service will be available at: http://localhost:8003"
+echo "Dapr HTTP endpoint: http://localhost:3503"
+echo "Dapr gRPC endpoint: localhost:50003"
 echo ""
-
-# Get the script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 dapr run \
   --app-id admin-service \
   --app-port 8003 \
-  --dapr-http-port 3500 \
-  --dapr-grpc-port 50001 \
-  --resources-path "$SCRIPT_DIR/.dapr/components" \
-  --config "$SCRIPT_DIR/.dapr/config.yaml" \
-  --log-level warn \
-  -- nodemon src/server.js
+  --dapr-http-port 3503 \
+  --dapr-grpc-port 50003 \
+  --log-level info \
+  --config ./.dapr/config.yaml \
+  --resources-path ./.dapr/components \
+  -- node src/server.js
