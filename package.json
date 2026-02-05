@@ -45,6 +45,11 @@
   "dependencies": {
     "@azure/monitor-opentelemetry": "^1.7.1",
     "@dapr/dapr": "^3.5.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.69.0",
+    "@opentelemetry/exporter-zipkin": "^2.5.0",
+    "@opentelemetry/resources": "^2.5.0",
+    "@opentelemetry/sdk-node": "^0.211.0",
+    "@opentelemetry/semantic-conventions": "^1.39.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",

@@ -4,11 +4,11 @@
  * This prevents module initialization race conditions with dotenv
  */
 
-// Initialize OpenTelemetry FIRST (before any other imports)
-import './instrumentation.js';
-
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
+
+// Initialize Zipkin tracing FIRST (before any other imports)
+import './tracing.js';
 
 async function startServer() {
   try {
