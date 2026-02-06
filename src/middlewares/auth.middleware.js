@@ -1,15 +1,13 @@
 import jwt from 'jsonwebtoken';
 import ErrorResponse from '../utils/error.response.js';
-import { getJwtConfig } from '../core/secretManager.js';
 
-// Cache JWT config to avoid repeated Dapr calls
-let jwtConfigCache = null;
-
-async function getCachedJwtConfig() {
-  if (jwtConfigCache === null) {
-    jwtConfigCache = await getJwtConfig();
-  }
-  return jwtConfigCache;
+// Get JWT config from environment variables (no Dapr dependency)
+function getJwtConfigFromEnv() {
+  return {
+    secret: process.env.JWT_SECRET,
+    issuer: process.env.JWT_ISSUER || 'xshopai-auth-service',
+    audience: process.env.JWT_AUDIENCE || 'xshopai-services',
+  };
 }
 
 /**
@@ -30,10 +28,10 @@ export const authenticateJWT = async (req, res, next) => {
     return next(new ErrorResponse('Unauthorized: Missing token', 401));
   }
   try {
-    const jwtConfig = await getCachedJwtConfig();
+    const jwtConfig = getJwtConfigFromEnv();
     const decoded = jwt.verify(token, jwtConfig.secret, {
       issuer: jwtConfig.issuer,
-      audience: jwtConfig.audience
+      audience: jwtConfig.audience,
     });
     req.user = {
       id: decoded.id,
@@ -61,7 +59,7 @@ export const requireRoles = (...roles) => {
 
     if (!hasRole) {
       return next(
-        new ErrorResponse(`Forbidden: Required roles: ${roles.join(' or ')}. User has: ${userRoles.join(', ')}`, 403)
+        new ErrorResponse(`Forbidden: Required roles: ${roles.join(' or ')}. User has: ${userRoles.join(', ')}`, 403),
       );
     }
 
