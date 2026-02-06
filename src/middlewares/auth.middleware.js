@@ -5,8 +5,8 @@ import ErrorResponse from '../utils/error.response.js';
 function getJwtConfigFromEnv() {
   return {
     secret: process.env.JWT_SECRET,
-    issuer: process.env.JWT_ISSUER || 'xshopai-auth-service',
-    audience: process.env.JWT_AUDIENCE || 'xshopai-services',
+    issuer: process.env.JWT_ISSUER || 'auth-service',
+    audience: process.env.JWT_AUDIENCE || 'xshopai-platform',
   };
 }
 

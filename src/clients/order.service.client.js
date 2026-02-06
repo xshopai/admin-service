@@ -35,7 +35,7 @@ const getAuthHeaders = (token) => {
  */
 export async function fetchAllOrders(token) {
   try {
-    const response = await orderClient.get('/api/orders', {
+    const response = await orderClient.get('/api/admin/orders', {
       headers: getAuthHeaders(token),
     });
     return response.data;
@@ -56,7 +56,7 @@ export async function fetchAllOrders(token) {
  */
 export async function fetchOrdersPaged(token, query = {}) {
   try {
-    const response = await orderClient.get('/api/orders/paged', {
+    const response = await orderClient.get('/api/admin/orders/paged', {
       headers: getAuthHeaders(token),
       params: query,
     });
@@ -78,7 +78,7 @@ export async function fetchOrdersPaged(token, query = {}) {
  */
 export async function fetchOrderById(orderId, token) {
   try {
-    const response = await orderClient.get(`/api/orders/${orderId}`, {
+    const response = await orderClient.get(`/api/admin/orders/${orderId}`, {
       headers: getAuthHeaders(token),
     });
     return response.data;
@@ -101,7 +101,7 @@ export async function fetchOrderById(orderId, token) {
  */
 export async function updateOrderStatus(orderId, statusData, token) {
   try {
-    const response = await orderClient.put(`/api/orders/${orderId}/status`, statusData, {
+    const response = await orderClient.put(`/api/admin/orders/${orderId}/status`, statusData, {
       headers: getAuthHeaders(token),
     });
     return response.data;
@@ -123,7 +123,7 @@ export async function updateOrderStatus(orderId, statusData, token) {
  */
 export async function deleteOrderById(orderId, token) {
   try {
-    await orderClient.delete(`/api/orders/${orderId}`, {
+    await orderClient.delete(`/api/admin/orders/${orderId}`, {
       headers: getAuthHeaders(token),
     });
   } catch (error) {
@@ -144,7 +144,7 @@ export async function deleteOrderById(orderId, token) {
  */
 export async function fetchOrderStats(token, options = {}) {
   try {
-    const response = await orderClient.get('/api/orders/stats', {
+    const response = await orderClient.get('/api/admin/orders/stats', {
       headers: getAuthHeaders(token),
       params: options,
     });
