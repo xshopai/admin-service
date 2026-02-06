@@ -1,11 +1,11 @@
 import express from 'express';
-import { health, readiness, liveness, metrics } from '../controllers/operational.controller.js';
+import { readiness, liveness, metrics } from '../controllers/operational.controller.js';
 
 const router = express.Router();
 
-router.get('/health', health);
-router.get('/readiness', readiness);
-router.get('/liveness', liveness);
+// Health check endpoints - Kubernetes standard convention
+router.get('/health/ready', readiness); // Standard path
+router.get('/health/live', liveness); // Standard path for Docker HEALTHCHECK
 router.get('/metrics', metrics);
 
 export default router;
