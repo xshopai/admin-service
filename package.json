@@ -51,6 +51,7 @@
     "@opentelemetry/resources": "^2.5.0",
     "@opentelemetry/sdk-node": "^0.211.0",
     "@opentelemetry/semantic-conventions": "^1.39.0",
+    "amqplib": "^0.10.4",
     "axios": "^1.13.4",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
