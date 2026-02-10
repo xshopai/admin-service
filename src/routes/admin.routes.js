@@ -4,6 +4,7 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  resetUserPassword,
   getAllOrders,
   getOrdersPaged,
   getOrderById,
@@ -23,6 +24,7 @@ router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
 router.patch('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
+router.post('/users/:id/reset-password', resetUserPassword);
 
 // Order routes
 router.get('/orders/stats', getOrderStats); // Must be before /orders/:id

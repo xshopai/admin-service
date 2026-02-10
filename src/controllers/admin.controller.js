@@ -9,6 +9,7 @@ import {
   deleteOrderById,
   fetchOrderStats,
 } from '../clients/order.service.client.js';
+import { triggerPasswordReset } from '../clients/auth.service.client.js';
 import adminValidator from '../validators/admin.validator.js';
 
 // ============================================================================
@@ -87,6 +88,45 @@ export const deleteUser = asyncHandler(async (req, res) => {
   logger.info('Admin deleting user', { actorId: req.user?.id, targetId: req.params.id });
   await removeUserById(req.params.id, req.headers.authorization?.split(' ')[1]);
   res.status(204).send();
+});
+
+/**
+ * @desc    Trigger password reset for a user (admin action)
+ * @route   POST /admin/users/:id/reset-password
+ * @access  Admin
+ */
+export const resetUserPassword = asyncHandler(async (req, res) => {
+  if (!adminValidator.isValidObjectId(req.params.id)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
+  // Get user email from request body (admin must provide email)
+  const { email } = req.body;
+
+  if (!email || !adminValidator.isValidEmail(email)) {
+    return res.status(400).json({ error: 'Valid email is required' });
+  }
+
+  logger.info('Admin triggering password reset', {
+    actorId: req.user?.id,
+    targetId: req.params.id,
+    email,
+  });
+
+  try {
+    const result = await triggerPasswordReset(email, req.headers.authorization?.split(' ')[1]);
+    res.json(result);
+  } catch (error) {
+    logger.error('Failed to trigger password reset', {
+      actorId: req.user?.id,
+      targetId: req.params.id,
+      email,
+      error: error.response?.data || error.message,
+    });
+    res.status(error.response?.status || 500).json({
+      error: error.response?.data?.message || 'Failed to trigger password reset',
+    });
+  }
 });
 
 // ============================================================================

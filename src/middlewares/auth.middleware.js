@@ -34,7 +34,7 @@ export const authenticateJWT = async (req, res, next) => {
       audience: jwtConfig.audience,
     });
     req.user = {
-      id: decoded.id,
+      id: decoded.sub || decoded.id, // Support standard JWT 'sub' claim (RFC 7519)
       email: decoded.email,
       roles: decoded.roles || [],
     };

@@ -6,8 +6,7 @@
 2. [Scope](#2-scope)
 3. [User Stories](#3-user-stories)
 4. [Functional Requirements](#4-functional-requirements)
-5. [Traceability Matrix](#5-traceability-matrix)
-6. [Non-Functional Requirements](#6-non-functional-requirements)
+5. [Non-Functional Requirements](#5-non-functional-requirements)
 
 ---
 
@@ -27,16 +26,7 @@ The Admin Service is a privileged microservice within the xshopai e-commerce pla
 | **Product Catalog Management** | Enable administrators to manage products, variations, and badges   |
 | **Audit & Compliance**         | Publish events for audit trail and compliance requirements         |
 
-### 1.3 Success Metrics
-
-| Metric                       | Target  | Description                                     |
-| ---------------------------- | ------- | ----------------------------------------------- |
-| API Response Time (p95)      | < 200ms | 95th percentile response time for admin queries |
-| Admin Operation Success Rate | > 99%   | Percentage of valid admin operations completed  |
-| Service Availability         | 99.9%   | Uptime during business hours                    |
-| Audit Event Coverage         | 100%    | All admin operations generate audit events      |
-
-### 1.4 Target Users
+### 1.3 Target Users
 
 | User              | Interaction                                                              |
 | ----------------- | ------------------------------------------------------------------------ |
@@ -575,43 +565,9 @@ The system shall publish events via Dapr Pub/Sub after admin operations.
 
 ---
 
-## 5. Traceability Matrix
+## 5. Non-Functional Requirements
 
-> **Purpose:** This matrix provides a single snapshot view linking User Stories to their implementing requirements.
-
-| User Story                    | Story Title        | Requirements                                                                                                                                                                                                                                                            |
-| ----------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [3.1](#31-user-management)    | User Management    | [4.1](#41-list-all-users), [4.2](#42-get-user-by-id), [4.3](#43-update-user), [4.4](#44-delete-user)                                                                                                                                                                    |
-| [3.2](#32-order-management)   | Order Management   | [4.5](#45-list-all-orders), [4.6](#46-get-paginated-orders), [4.7](#47-get-order-by-id), [4.8](#48-update-order-status), [4.9](#49-delete-order), [4.10](#410-get-order-statistics)                                                                                     |
-| [3.3](#33-product-management) | Product Management | [4.11](#411-list-all-products), [4.12](#412-get-product-by-id), [4.13](#413-create-product), [4.14](#414-update-product), [4.15](#415-delete-product), [4.16](#416-manage-product-variations), [4.17](#417-manage-product-badges), [4.18](#418-bulk-product-operations) |
-| [3.4](#34-audit-trail)        | Audit Trail        | [4.19](#419-publish-admin-events)                                                                                                                                                                                                                                       |
-
-**Coverage Summary:**
-
-- Total User Stories: 4
-- Total Requirements: 19
-- Requirements without User Story: 0
-- User Stories without Requirements: 0
-
----
-
-## 6. Non-Functional Requirements
-
-### 6.1 Performance
-
-| Metric                  | Target    | Description                             |
-| ----------------------- | --------- | --------------------------------------- |
-| API Response Time (p95) | < 200ms   | Admin queries and operations            |
-| Throughput              | 100 req/s | Sustained load during normal operations |
-
-### 6.2 Reliability
-
-| Metric                  | Target | Description                               |
-| ----------------------- | ------ | ----------------------------------------- |
-| Service Availability    | 99.9%  | Uptime during business hours              |
-| Admin Operation Success | > 99%  | Valid requests that complete successfully |
-
-### 6.3 Security
+### 5.1 Security
 
 | Requirement                                    | Priority |
 | ---------------------------------------------- | -------- |
@@ -622,7 +578,7 @@ The system shall publish events via Dapr Pub/Sub after admin operations.
 | No sensitive data (passwords, tokens) in logs  | High     |
 | Audit events for all admin operations          | High     |
 
-### 6.4 Observability
+### 5.2 Observability
 
 | Requirement                                                         | Priority |
 | ------------------------------------------------------------------- | -------- |
