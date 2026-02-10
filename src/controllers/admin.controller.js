@@ -173,11 +173,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
  */
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   logger.info('Admin updating order status', { actorId: req.user?.id, orderId: req.params.id });
-  const updated = await updateOrderStatusInService(
-    req.params.id,
-    req.body,
-    req.headers.authorization?.split(' ')[1]
-  );
+  const updated = await updateOrderStatusInService(req.params.id, req.body, req.headers.authorization?.split(' ')[1]);
   res.json(updated);
 });
 
