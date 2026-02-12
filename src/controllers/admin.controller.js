@@ -209,3 +209,102 @@ export const getOrderStats = asyncHandler(async (req, res) => {
   });
   res.json(stats);
 });
+
+// ============================================================================
+// Returns Management (Stub - Not Yet Implemented)
+// ============================================================================
+
+/**
+ * @desc    Get all returns (stub)
+ * @route   GET /admin/returns
+ * @access  Admin
+ */
+export const getAllReturns = asyncHandler(async (req, res) => {
+  logger.info('Admin requested all returns (stub)', { actorId: req.user?._id });
+  res.json({
+    success: true,
+    data: [],
+    message: 'Returns management not yet implemented',
+  });
+});
+
+/**
+ * @desc    Get returns with pagination (stub)
+ * @route   GET /admin/returns/paged
+ * @access  Admin
+ */
+export const getReturnsPaged = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 20;
+
+  logger.info('Admin requested paged returns (stub)', {
+    actorId: req.user?._id,
+    page,
+    pageSize,
+  });
+
+  res.json({
+    success: true,
+    data: [],
+    pagination: {
+      page,
+      pageSize,
+      totalCount: 0,
+      totalPages: 0,
+    },
+    message: 'Returns management not yet implemented',
+  });
+});
+
+/**
+ * @desc    Get return statistics (stub)
+ * @route   GET /admin/returns/stats
+ * @access  Admin
+ */
+export const getReturnsStats = asyncHandler(async (req, res) => {
+  logger.info('Admin requested returns stats (stub)', { actorId: req.user?._id });
+  res.json({
+    success: true,
+    data: {
+      total: 0,
+      requested: 0,
+      approved: 0,
+      rejected: 0,
+      refundProcessed: 0,
+    },
+    message: 'Returns management not yet implemented',
+  });
+});
+
+/**
+ * @desc    Get return by ID (stub)
+ * @route   GET /admin/returns/:id
+ * @access  Admin
+ */
+export const getReturnById = asyncHandler(async (req, res) => {
+  logger.info('Admin requested return by id (stub)', {
+    actorId: req.user?._id,
+    returnId: req.params.id,
+  });
+  res.status(404).json({
+    success: false,
+    error: 'Returns management not yet implemented',
+  });
+});
+
+/**
+ * @desc    Update return status (stub)
+ * @route   PUT /admin/returns/:id/status
+ * @access  Admin
+ */
+export const updateReturnStatus = asyncHandler(async (req, res) => {
+  logger.info('Admin updating return status (stub)', {
+    actorId: req.user?._id,
+    returnId: req.params.id,
+    status: req.body.status,
+  });
+  res.status(501).json({
+    success: false,
+    error: 'Returns management not yet implemented',
+  });
+});

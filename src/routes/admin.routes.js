@@ -11,6 +11,11 @@ import {
   updateOrderStatus,
   deleteOrder,
   getOrderStats,
+  getAllReturns,
+  getReturnsPaged,
+  getReturnsStats,
+  getReturnById,
+  updateReturnStatus,
 } from '../controllers/admin.controller.js';
 import { authenticateJWT, requireRoles } from '../middlewares/auth.middleware.js';
 
@@ -33,5 +38,12 @@ router.get('/orders', getAllOrders);
 router.get('/orders/:id', getOrderById);
 router.put('/orders/:id/status', updateOrderStatus);
 router.delete('/orders/:id', deleteOrder);
+
+// Returns routes (stub - not yet implemented)
+router.get('/returns/stats', getReturnsStats); // Must be before /returns/:id
+router.get('/returns/paged', getReturnsPaged);
+router.get('/returns', getAllReturns);
+router.get('/returns/:id', getReturnById);
+router.put('/returns/:id/status', updateReturnStatus);
 
 export default router;
