@@ -49,7 +49,7 @@ Admin Service proxies to these services, so they must be running:
 | ------------- | --------------------------- | ---------------- |
 | User Service  | `http://localhost:8002/api` | User operations  |
 | Order Service | `http://localhost:8006/api` | Order operations |
-| Auth Service  | `http://localhost:8000`     | JWT validation   |
+| Auth Service  | `http://localhost:8004`     | JWT validation   |
 
 ### Verify Prerequisites
 

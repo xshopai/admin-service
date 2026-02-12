@@ -1,7 +1,7 @@
 import axios from 'axios';
 import logger from '../core/logger.js';
 
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8003/api/auth';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8004/api/auth';
 
 /**
  * Create axios instance for auth-service
