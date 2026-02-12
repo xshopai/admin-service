@@ -7,11 +7,11 @@
 import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
-// Initialize Zipkin tracing FIRST (before any other imports)
-import './tracing.js';
-
 async function startServer() {
   try {
+    // Initialize tracing FIRST (must be dynamic import after dotenv.config due to ES module hoisting)
+    await import('./tracing.js');
+
     // Start the application (imports app.js after env vars are loaded)
     await import('./app.js');
   } catch (error) {

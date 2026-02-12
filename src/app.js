@@ -34,9 +34,10 @@ app.use(errorHandler);
 
 const PORT = config.server.port;
 const HOST = config.server.host;
+const displayHost = HOST === '0.0.0.0' ? 'localhost' : HOST;
 
 app.listen(PORT, HOST, () => {
-  logger.info(`Admin service running on ${HOST}:${PORT} in ${config.env} mode`, {
+  logger.info(`Admin service running on ${displayHost}:${PORT} in ${config.env} mode`, {
     service: 'admin-service',
     version: '1.0.0',
   });
