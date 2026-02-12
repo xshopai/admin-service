@@ -39,7 +39,7 @@
     "cross-env": "^10.1.0",
     "dotenv-cli": "^8.0.0",
     "jest": "^30.0.2",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.11"
   },
   "dependencies": {
     "@azure/monitor-opentelemetry": "^1.7.1",
