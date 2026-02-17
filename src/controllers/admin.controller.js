@@ -411,6 +411,19 @@ export const confirmOrderPayment = asyncHandler(async (req, res) => {
       confirmedBy: adminId,
     });
 
+    // Update order status to Confirmed in order-service
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      await updateOrderStatusInService(orderId, { status: 'Confirmed', reason: 'Payment confirmed by admin' }, token);
+      logger.info('Order status updated to Confirmed', { orderId, correlationId });
+    } catch (statusError) {
+      logger.warn('Failed to update order status, but payment event was published', {
+        orderId,
+        error: statusError.message,
+        correlationId,
+      });
+    }
+
     res.json({
       success: true,
       message: 'Payment confirmed. Order saga will advance to shipping preparation.',
@@ -478,6 +491,19 @@ export const failOrderPayment = asyncHandler(async (req, res) => {
       correlationId,
       failedBy: adminId,
     });
+
+    // Update order status to Cancelled in order-service
+    try {
+      const token = req.headers.authorization?.split(' ')[1];
+      await updateOrderStatusInService(orderId, { status: 'Cancelled', reason: reason }, token);
+      logger.info('Order status updated to Cancelled', { orderId, correlationId });
+    } catch (statusError) {
+      logger.warn('Failed to update order status, but payment failed event was published', {
+        orderId,
+        error: statusError.message,
+        correlationId,
+      });
+    }
 
     res.json({
       success: true,
