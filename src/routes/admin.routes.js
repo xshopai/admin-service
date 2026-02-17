@@ -11,6 +11,7 @@ import {
   updateOrderStatus,
   deleteOrder,
   getOrderStats,
+  getOrderTracking,
   getOrderPayment,
   confirmOrderPayment,
   failOrderPayment,
@@ -39,6 +40,7 @@ router.get('/orders/stats', getOrderStats); // Must be before /orders/:id
 router.get('/orders/paged', getOrdersPaged);
 router.get('/orders', getAllOrders);
 router.get('/orders/:id', getOrderById);
+router.get('/orders/:id/tracking', getOrderTracking);
 router.put('/orders/:id/status', updateOrderStatus);
 router.delete('/orders/:id', deleteOrder);
 

@@ -157,3 +157,25 @@ export async function fetchOrderStats(token, options = {}) {
     throw error;
   }
 }
+
+/**
+ * Fetch order tracking info with timeline
+ * @param {string} orderId - Order ID
+ * @param {string} token - JWT token
+ * @returns {Promise<Object>} Tracking info with timeline
+ */
+export async function fetchOrderTracking(orderId, token) {
+  try {
+    const response = await orderClient.get(`/api/admin/orders/${orderId}/tracking`, {
+      headers: getAuthHeaders(token),
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('Failed to fetch order tracking from order-service', {
+      error: error.message,
+      orderId,
+      status: error.response?.status,
+    });
+    throw error;
+  }
+}

@@ -8,6 +8,7 @@ import {
   updateOrderStatus as updateOrderStatusInService,
   deleteOrderById,
   fetchOrderStats,
+  fetchOrderTracking,
 } from '../clients/order.service.client.js';
 import { triggerPasswordReset } from '../clients/auth.service.client.js';
 import { fetchPaymentByOrderId } from '../clients/payment.service.client.js';
@@ -210,6 +211,20 @@ export const getOrderStats = asyncHandler(async (req, res) => {
     recentLimit,
   });
   res.json(stats);
+});
+
+/**
+ * @desc    Get order tracking info with timeline
+ * @route   GET /admin/orders/:id/tracking
+ * @access  Admin
+ */
+export const getOrderTracking = asyncHandler(async (req, res) => {
+  logger.info('Admin requested order tracking', { actorId: req.user?._id, orderId: req.params.id });
+  const tracking = await fetchOrderTracking(req.params.id, req.headers.authorization?.split(' ')[1]);
+  res.json({
+    success: true,
+    data: tracking,
+  });
 });
 
 // ============================================================================
