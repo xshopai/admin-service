@@ -11,15 +11,12 @@ import axios from 'axios';
 import { generateTestUser, createUser, deleteUser, sleep } from '../../shared/helpers/user.js';
 import { registerUser, login } from '../../shared/helpers/auth.js';
 
-const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:3010';
-const ADMIN_SERVICE_HEALTH_URL = process.env.ADMIN_SERVICE_HEALTH_URL || 'http://localhost:3010/health';
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-const AUTH_SERVICE_HEALTH_URL = process.env.AUTH_SERVICE_HEALTH_URL || 'http://localhost:3001/health';
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:3002';
-const USER_SERVICE_HEALTH_URL = process.env.USER_SERVICE_HEALTH_URL || 'http://localhost:3002/health';
-const MESSAGE_BROKER_SERVICE_URL = process.env.MESSAGE_BROKER_SERVICE_URL || 'http://localhost:4000';
-const MESSAGE_BROKER_SERVICE_HEALTH_URL =
-  process.env.MESSAGE_BROKER_SERVICE_HEALTH_URL || 'http://localhost:4000/health';
+const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:8003';
+const ADMIN_SERVICE_HEALTH_URL = process.env.ADMIN_SERVICE_HEALTH_URL || 'http://localhost:8003/health/ready';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8004';
+const AUTH_SERVICE_HEALTH_URL = process.env.AUTH_SERVICE_HEALTH_URL || 'http://localhost:8004/health/ready';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://localhost:8002';
+const USER_SERVICE_HEALTH_URL = process.env.USER_SERVICE_HEALTH_URL || 'http://localhost:8002/health/ready';
 
 // Verify required services are available
 async function verifyServices() {
@@ -27,14 +24,12 @@ async function verifyServices() {
     await axios.get(ADMIN_SERVICE_HEALTH_URL, { timeout: 2000 });
     await axios.get(AUTH_SERVICE_HEALTH_URL, { timeout: 2000 });
     await axios.get(USER_SERVICE_HEALTH_URL, { timeout: 2000 });
-    await axios.get(MESSAGE_BROKER_SERVICE_HEALTH_URL, { timeout: 2000 });
     return true;
   } catch (error) {
     console.error('❌ Required services not available:');
     console.error(`   Admin Service: ${ADMIN_SERVICE_URL}`);
     console.error(`   Auth Service: ${AUTH_SERVICE_URL}`);
     console.error(`   User Service: ${USER_SERVICE_URL}`);
-    console.error(`   Message Broker: ${MESSAGE_BROKER_SERVICE_URL}`);
     console.error('   Please start all required services before running tests.');
     return false;
   }

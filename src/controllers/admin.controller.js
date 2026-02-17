@@ -10,6 +10,8 @@ import {
   fetchOrderStats,
 } from '../clients/order.service.client.js';
 import { triggerPasswordReset } from '../clients/auth.service.client.js';
+import { fetchPaymentByOrderId } from '../clients/payment.service.client.js';
+import { getMessagingProvider } from '../messaging/index.js';
 import adminValidator from '../validators/admin.validator.js';
 
 // ============================================================================
@@ -307,4 +309,198 @@ export const updateReturnStatus = asyncHandler(async (req, res) => {
     success: false,
     error: 'Returns management not yet implemented',
   });
+});
+
+// ============================================================================
+// Payment Management
+// ============================================================================
+
+/**
+ * @desc    Get payment for an order
+ * @route   GET /admin/orders/:id/payment
+ * @access  Admin
+ *
+ * Fetches payment details from payment-service for the given order.
+ * Used by admin to verify payment before confirming.
+ */
+export const getOrderPayment = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  logger.info('Admin requested payment for order', {
+    actorId: req.user?._id,
+    orderId,
+  });
+
+  const payment = await fetchPaymentByOrderId(orderId, req.headers.authorization?.split(' ')[1]);
+
+  if (!payment) {
+    return res.status(404).json({
+      success: false,
+      error: 'No payment found for this order',
+      orderId,
+    });
+  }
+
+  res.json({
+    success: true,
+    data: payment,
+  });
+});
+
+/**
+ * @desc    Confirm payment for an order (Admin action)
+ * @route   POST /admin/orders/:id/confirm-payment
+ * @access  Admin
+ *
+ * Admin confirms that payment has been received and verified.
+ * This publishes a payment.processed event to advance the order saga.
+ */
+export const confirmOrderPayment = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const adminId = req.user?._id || req.user?.id;
+  const correlationId = req.headers['x-correlation-id'] || `admin-${Date.now()}`;
+
+  logger.info('Admin confirming payment for order', {
+    actorId: adminId,
+    orderId,
+    correlationId,
+  });
+
+  // First, verify payment exists
+  const payment = await fetchPaymentByOrderId(orderId, req.headers.authorization?.split(' ')[1]);
+
+  if (!payment) {
+    return res.status(404).json({
+      success: false,
+      error: 'No payment found for this order. Cannot confirm.',
+      orderId,
+    });
+  }
+
+  // Check payment status - should be succeeded or processing
+  const status = (payment.status || '').toLowerCase();
+  if (status !== 'succeeded' && status !== 'processing') {
+    return res.status(400).json({
+      success: false,
+      error: `Cannot confirm payment with status: ${payment.status}`,
+      orderId,
+      paymentId: payment.id,
+      paymentStatus: payment.status,
+    });
+  }
+
+  // Publish payment.processed event to advance the saga
+  const eventPayload = {
+    orderId: orderId,
+    paymentId: payment.id?.toString() || payment.paymentId,
+    amount: payment.amount,
+    currency: payment.currency || 'USD',
+    correlationId: correlationId,
+    processedAt: new Date().toISOString(),
+    confirmedBy: adminId,
+    confirmationSource: 'admin-ui',
+  };
+
+  try {
+    const messaging = await getMessagingProvider();
+    await messaging.publishEvent('payment.processed', eventPayload, correlationId);
+
+    logger.info('Published payment.processed event', {
+      orderId,
+      paymentId: payment.id,
+      correlationId,
+      confirmedBy: adminId,
+    });
+
+    res.json({
+      success: true,
+      message: 'Payment confirmed. Order saga will advance to shipping preparation.',
+      data: {
+        orderId,
+        paymentId: payment.id,
+        status: 'confirmed',
+        confirmedAt: new Date().toISOString(),
+        confirmedBy: adminId,
+      },
+    });
+  } catch (error) {
+    logger.error('Failed to publish payment.processed event', {
+      orderId,
+      error: error.message,
+      correlationId,
+    });
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to confirm payment. Event publishing failed.',
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * @desc    Mark payment as failed (Admin action)
+ * @route   POST /admin/orders/:id/fail-payment
+ * @access  Admin
+ *
+ * Admin marks payment as failed/rejected.
+ * This publishes a payment.failed event to trigger saga compensation.
+ */
+export const failOrderPayment = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const adminId = req.user?._id || req.user?.id;
+  const correlationId = req.headers['x-correlation-id'] || `admin-${Date.now()}`;
+  const reason = req.body.reason || 'Payment rejected by admin';
+
+  logger.info('Admin marking payment as failed for order', {
+    actorId: adminId,
+    orderId,
+    reason,
+    correlationId,
+  });
+
+  // Publish payment.failed event to trigger saga compensation
+  const eventPayload = {
+    orderId: orderId,
+    reason: reason,
+    correlationId: correlationId,
+    failedAt: new Date().toISOString(),
+    failedBy: adminId,
+    failureSource: 'admin-ui',
+  };
+
+  try {
+    const messaging = await getMessagingProvider();
+    await messaging.publishEvent('payment.failed', eventPayload, correlationId);
+
+    logger.info('Published payment.failed event', {
+      orderId,
+      reason,
+      correlationId,
+      failedBy: adminId,
+    });
+
+    res.json({
+      success: true,
+      message: 'Payment marked as failed. Order saga will initiate compensation.',
+      data: {
+        orderId,
+        status: 'failed',
+        reason,
+        failedAt: new Date().toISOString(),
+        failedBy: adminId,
+      },
+    });
+  } catch (error) {
+    logger.error('Failed to publish payment.failed event', {
+      orderId,
+      error: error.message,
+      correlationId,
+    });
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to mark payment as failed. Event publishing failed.',
+      details: error.message,
+    });
+  }
 });

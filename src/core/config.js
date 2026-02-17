@@ -19,12 +19,12 @@ const config = {
 
   // External Services
   services: {
-    user: process.env.USER_SERVICE_URL || 'http://localhost:3002',
-    product: process.env.PRODUCT_SERVICE_URL || 'http://localhost:3001',
-    order: process.env.ORDER_SERVICE_URL || 'http://localhost:5088',
-    payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:3005',
-    audit: process.env.AUDIT_SERVICE_URL || 'http://localhost:3007',
-    notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3003',
+    user: process.env.USER_SERVICE_URL || 'http://localhost:8002',
+    product: process.env.PRODUCT_SERVICE_URL || 'http://localhost:8001',
+    order: process.env.ORDER_SERVICE_URL || 'http://localhost:8006',
+    payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:8009',
+    audit: process.env.AUDIT_SERVICE_URL || 'http://localhost:8011',
+    notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:8011',
   },
 
   // Security

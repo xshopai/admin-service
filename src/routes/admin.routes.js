@@ -11,6 +11,9 @@ import {
   updateOrderStatus,
   deleteOrder,
   getOrderStats,
+  getOrderPayment,
+  confirmOrderPayment,
+  failOrderPayment,
   getAllReturns,
   getReturnsPaged,
   getReturnsStats,
@@ -38,6 +41,11 @@ router.get('/orders', getAllOrders);
 router.get('/orders/:id', getOrderById);
 router.put('/orders/:id/status', updateOrderStatus);
 router.delete('/orders/:id', deleteOrder);
+
+// Payment management routes (for admin-driven workflow)
+router.get('/orders/:id/payment', getOrderPayment);
+router.post('/orders/:id/confirm-payment', confirmOrderPayment);
+router.post('/orders/:id/fail-payment', failOrderPayment);
 
 // Returns routes (stub - not yet implemented)
 router.get('/returns/stats', getReturnsStats); // Must be before /returns/:id
