@@ -85,7 +85,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start"]
 
 # Labels for better image management and security scanning
 LABEL maintainer="xshopai Team"
