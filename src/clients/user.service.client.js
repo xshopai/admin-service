@@ -18,7 +18,7 @@ const userClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
     // Add service token for inter-service authentication
-    'X-Service-Token': process.env.SERVICE_USER_TOKEN || '',
+    'X-Service-Token': process.env.USER_SERVICE_TOKEN || '',
   },
 });
 
