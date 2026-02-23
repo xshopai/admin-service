@@ -1,24 +1,11 @@
 /**
  * Payment Service Client
- * HTTP client for communicating with the payment-service
+ * Dual-mode client for communicating with the payment-service
+ * Supports both HTTP and Dapr service invocation
  */
 
-import axios from 'axios';
-import config from '../core/config.js';
+import { invokeService } from '../core/daprClient.js';
 import logger from '../core/logger.js';
-
-const PAYMENT_SERVICE_URL = config.services.payment;
-
-/**
- * Create axios instance for payment service
- */
-const paymentClient = axios.create({
-  baseURL: PAYMENT_SERVICE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 /**
  * Get authorization headers
@@ -41,26 +28,27 @@ export async function fetchPaymentByOrderId(orderId, token) {
       hasToken: !!token,
       tokenLength: token?.length,
     });
-    const response = await paymentClient.get(`/api/payments/order/${orderId}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'payment-service',
+      `api/payments/order/${orderId}`,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
-    if (error.response?.status === 404) {
+    if (error.message.includes('404')) {
       logger.debug('No payment found for order', { orderId });
-      return null; // No payment found for this order
+      return null;
     }
-    if (error.response?.status === 401) {
+    if (error.message.includes('401')) {
       logger.warn('Unauthorized access to payment-service - JWT may be invalid or expired', {
         orderId,
-        status: error.response?.status,
       });
-      return null; // Return null instead of throwing to allow UI to show "not found"
+      return null;
     }
     logger.error('Failed to fetch payment from payment-service', {
       error: error.message,
       orderId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -74,15 +62,17 @@ export async function fetchPaymentByOrderId(orderId, token) {
  */
 export async function fetchPaymentById(paymentId, token) {
   try {
-    const response = await paymentClient.get(`/api/payments/${paymentId}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'payment-service',
+      `api/payments/${paymentId}`,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch payment from payment-service', {
       error: error.message,
       paymentId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -96,15 +86,18 @@ export async function fetchPaymentById(paymentId, token) {
  */
 export async function fetchPayments(token, query = {}) {
   try {
-    const response = await paymentClient.get('/api/payments', {
-      headers: getAuthHeaders(token),
-      params: query,
-    });
-    return response.data;
+    const queryString = new URLSearchParams(query).toString();
+    const endpoint = queryString ? `api/payments?${queryString}` : 'api/payments';
+    return await invokeService(
+      'payment-service',
+      endpoint,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch payments from payment-service', {
       error: error.message,
-      status: error.response?.status,
     });
     throw error;
   }

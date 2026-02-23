@@ -1,28 +1,32 @@
 import logger from './logger.js';
 import { getMessagingProvider } from '../messaging/index.js';
 
-// Determine service invocation mode based on MESSAGING_PROVIDER
-const MESSAGING_PROVIDER = process.env.MESSAGING_PROVIDER || 'rabbitmq';
-const USE_DAPR = MESSAGING_PROVIDER === 'dapr';
+// Service invocation mode (independent from messaging)
+const SERVICE_INVOCATION_MODE = process.env.SERVICE_INVOCATION_MODE || 'http';
+const USE_DAPR = SERVICE_INVOCATION_MODE === 'dapr';
 
-// Dapr sidecar configuration (only used when MESSAGING_PROVIDER=dapr)
+// Dapr sidecar configuration (only used when SERVICE_INVOCATION_MODE=dapr)
 const DAPR_HOST = process.env.DAPR_HOST || 'localhost';
 const DAPR_HTTP_PORT = process.env.DAPR_HTTP_PORT || '3500';
 
-// Dapr App IDs for service discovery (used when MESSAGING_PROVIDER=dapr)
-const DAPR_APP_IDS = {
-  'user-service': process.env.DAPR_USER_SERVICE_APP_ID || 'user-service',
-  'order-service': process.env.DAPR_ORDER_SERVICE_APP_ID || 'order-service',
-  'product-service': process.env.DAPR_PRODUCT_SERVICE_APP_ID || 'product-service',
-  'inventory-service': process.env.DAPR_INVENTORY_SERVICE_APP_ID || 'inventory-service',
+// Service App IDs for Dapr service invocation (used when SERVICE_INVOCATION_MODE=dapr)
+const SERVICE_APP_IDS = {
+  'user-service': process.env.USER_SERVICE_APP_ID || 'user-service',
+  'order-service': process.env.ORDER_SERVICE_APP_ID || 'order-service',
+  'product-service': process.env.PRODUCT_SERVICE_APP_ID || 'product-service',
+  'payment-service': process.env.PAYMENT_SERVICE_APP_ID || 'payment-service',
+  'audit-service': process.env.AUDIT_SERVICE_APP_ID || 'audit-service',
+  'notification-service': process.env.NOTIFICATION_SERVICE_APP_ID || 'notification-service',
 };
 
-// Direct HTTP URLs for service discovery (used when MESSAGING_PROVIDER != dapr)
+// Direct HTTP URLs for service invocation (used when SERVICE_INVOCATION_MODE=http)
 const SERVICE_URLS = {
   'user-service': process.env.USER_SERVICE_URL || 'http://xshopai-user-service:8002',
   'order-service': process.env.ORDER_SERVICE_URL || 'http://xshopai-order-service:8006',
   'product-service': process.env.PRODUCT_SERVICE_URL || 'http://xshopai-product-service:8001',
-  'inventory-service': process.env.INVENTORY_SERVICE_URL || 'http://xshopai-inventory-service:8005',
+  'payment-service': process.env.PAYMENT_SERVICE_URL || 'http://xshopai-payment-service:8009',
+  'audit-service': process.env.AUDIT_SERVICE_URL || 'http://xshopai-audit-service:8012',
+  'notification-service': process.env.NOTIFICATION_SERVICE_URL || 'http://xshopai-notification-service:8011',
 };
 
 /**
@@ -44,7 +48,7 @@ export async function invokeService(serviceName, methodName, httpMethod = 'GET',
 
     if (USE_DAPR) {
       // Dapr service invocation: http://localhost:3500/v1.0/invoke/{appId}/method/{method}
-      const appId = DAPR_APP_IDS[serviceName] || serviceName;
+      const appId = SERVICE_APP_IDS[serviceName] || serviceName;
       url = `http://${DAPR_HOST}:${DAPR_HTTP_PORT}/v1.0/invoke/${appId}/method/${cleanMethodName}`;
 
       logger.debug('Invoking service via Dapr', {

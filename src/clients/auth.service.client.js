@@ -1,18 +1,11 @@
-import axios from 'axios';
-import logger from '../core/logger.js';
-
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:8004/api/auth';
-
 /**
- * Create axios instance for auth-service
+ * Auth Service Client
+ * Dual-mode client for communicating with the auth-service
+ * Supports both HTTP and Dapr service invocation
  */
-const authClient = axios.create({
-  baseURL: AUTH_SERVICE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+
+import { invokeService } from '../core/daprClient.js';
+import logger from '../core/logger.js';
 
 /**
  * Helper to get authorization headers
@@ -37,20 +30,22 @@ function getAuthHeaders(token) {
 export async function triggerPasswordReset(email, token) {
   try {
     logger.info('Triggering admin password reset', { email });
-    const response = await authClient.post(
-      '/admin/password/reset',
+    
+    // Note: auth-service might not be registered with service mesh yet
+    // This is a temporary placeholder until auth-service is integrated
+    logger.warn('Auth service client called but service may not be fully integrated', { email });
+    
+    return await invokeService(
+      'auth-service',
+      'api/auth/admin/password/reset',
+      'POST',
       { email },
-      {
-        headers: getAuthHeaders(token),
-      },
+      { headers: getAuthHeaders(token) }
     );
-    logger.info('Admin password reset triggered successfully', { email });
-    return response.data;
   } catch (error) {
     logger.error('Failed to trigger admin password reset', {
       email,
-      error: error.response?.data || error.message,
-      status: error.response?.status,
+      error: error.message,
     });
     throw error;
   }

@@ -1,26 +1,11 @@
 /**
  * User Service Client
- * HTTP client for communicating with the user-service
+ * Dual-mode client for communicating with the user-service
+ * Supports both HTTP and Dapr service invocation
  */
 
-import axios from 'axios';
-import config from '../core/config.js';
+import { invokeService } from '../core/daprClient.js';
 import logger from '../core/logger.js';
-
-const USER_SERVICE_URL = config.services.user;
-
-/**
- * Create axios instance for user service
- */
-const userClient = axios.create({
-  baseURL: USER_SERVICE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-    // Add service token for inter-service authentication
-    'X-Service-Token': process.env.USER_SERVICE_TOKEN || '',
-  },
-});
 
 /**
  * Get authorization headers
@@ -37,14 +22,16 @@ const getAuthHeaders = (token) => {
  */
 export async function fetchAllUsers(token) {
   try {
-    const response = await userClient.get('/api/admin/users', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'user-service',
+      'api/admin/users',
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch users from user-service', {
       error: error.message,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -58,15 +45,17 @@ export async function fetchAllUsers(token) {
  */
 export async function fetchUserById(userId, token) {
   try {
-    const response = await userClient.get(`/api/admin/users/${userId}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'user-service',
+      `api/admin/users/${userId}`,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch user from user-service', {
       error: error.message,
       userId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -81,15 +70,17 @@ export async function fetchUserById(userId, token) {
  */
 export async function updateUserById(userId, updateData, token) {
   try {
-    const response = await userClient.patch(`/api/admin/users/${userId}`, updateData, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'user-service',
+      `api/admin/users/${userId}`,
+      'PATCH',
+      updateData,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to update user in user-service', {
       error: error.message,
       userId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -103,14 +94,17 @@ export async function updateUserById(userId, updateData, token) {
  */
 export async function removeUserById(userId, token) {
   try {
-    await userClient.delete(`/api/admin/users/${userId}`, {
-      headers: getAuthHeaders(token),
-    });
+    return await invokeService(
+      'user-service',
+      `api/admin/users/${userId}`,
+      'DELETE',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to delete user from user-service', {
       error: error.message,
       userId,
-      status: error.response?.status,
     });
     throw error;
   }

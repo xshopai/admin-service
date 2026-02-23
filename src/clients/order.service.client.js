@@ -1,24 +1,11 @@
 /**
  * Order Service Client
- * HTTP client for communicating with the order-service
+ * Dual-mode client for communicating with the order-service
+ * Supports both HTTP and Dapr service invocation
  */
 
-import axios from 'axios';
-import config from '../core/config.js';
+import { invokeService } from '../core/daprClient.js';
 import logger from '../core/logger.js';
-
-const ORDER_SERVICE_URL = config.services.order;
-
-/**
- * Create axios instance for order service
- */
-const orderClient = axios.create({
-  baseURL: ORDER_SERVICE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 /**
  * Get authorization headers
@@ -35,14 +22,16 @@ const getAuthHeaders = (token) => {
  */
 export async function fetchAllOrders(token) {
   try {
-    const response = await orderClient.get('/api/admin/orders', {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'order-service',
+      'api/admin/orders',
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch orders from order-service', {
       error: error.message,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -56,15 +45,18 @@ export async function fetchAllOrders(token) {
  */
 export async function fetchOrdersPaged(token, query = {}) {
   try {
-    const response = await orderClient.get('/api/admin/orders/paged', {
-      headers: getAuthHeaders(token),
-      params: query,
-    });
-    return response.data;
+    const queryString = new URLSearchParams(query).toString();
+    const endpoint = queryString ? `api/admin/orders/paged?${queryString}` : 'api/admin/orders/paged';
+    return await invokeService(
+      'order-service',
+      endpoint,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch paged orders from order-service', {
       error: error.message,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -78,15 +70,17 @@ export async function fetchOrdersPaged(token, query = {}) {
  */
 export async function fetchOrderById(orderId, token) {
   try {
-    const response = await orderClient.get(`/api/admin/orders/${orderId}`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'order-service',
+      `api/admin/orders/${orderId}`,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch order from order-service', {
       error: error.message,
       orderId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -101,15 +95,17 @@ export async function fetchOrderById(orderId, token) {
  */
 export async function updateOrderStatus(orderId, statusData, token) {
   try {
-    const response = await orderClient.put(`/api/admin/orders/${orderId}/status`, statusData, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'order-service',
+      `api/admin/orders/${orderId}/status`,
+      'PUT',
+      statusData,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to update order status in order-service', {
       error: error.message,
       orderId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -123,14 +119,17 @@ export async function updateOrderStatus(orderId, statusData, token) {
  */
 export async function deleteOrderById(orderId, token) {
   try {
-    await orderClient.delete(`/api/admin/orders/${orderId}`, {
-      headers: getAuthHeaders(token),
-    });
+    return await invokeService(
+      'order-service',
+      `api/admin/orders/${orderId}`,
+      'DELETE',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to delete order from order-service', {
       error: error.message,
       orderId,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -144,15 +143,18 @@ export async function deleteOrderById(orderId, token) {
  */
 export async function fetchOrderStats(token, options = {}) {
   try {
-    const response = await orderClient.get('/api/admin/orders/stats', {
-      headers: getAuthHeaders(token),
-      params: options,
-    });
-    return response.data;
+    const queryString = new URLSearchParams(options).toString();
+    const endpoint = queryString ? `api/admin/orders/stats?${queryString}` : 'api/admin/orders/stats';
+    return await invokeService(
+      'order-service',
+      endpoint,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch order stats from order-service', {
       error: error.message,
-      status: error.response?.status,
     });
     throw error;
   }
@@ -166,15 +168,17 @@ export async function fetchOrderStats(token, options = {}) {
  */
 export async function fetchOrderTracking(orderId, token) {
   try {
-    const response = await orderClient.get(`/api/admin/orders/${orderId}/tracking`, {
-      headers: getAuthHeaders(token),
-    });
-    return response.data;
+    return await invokeService(
+      'order-service',
+      `api/admin/orders/${orderId}/tracking`,
+      'GET',
+      null,
+      { headers: getAuthHeaders(token) }
+    );
   } catch (error) {
     logger.error('Failed to fetch order tracking from order-service', {
       error: error.message,
       orderId,
-      status: error.response?.status,
     });
     throw error;
   }
