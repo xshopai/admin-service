@@ -30,17 +30,17 @@ function getAuthHeaders(token) {
 export async function triggerPasswordReset(email, token) {
   try {
     logger.info('Triggering admin password reset', { email });
-    
+
     // Note: auth-service might not be registered with service mesh yet
     // This is a temporary placeholder until auth-service is integrated
     logger.warn('Auth service client called but service may not be fully integrated', { email });
-    
+
     return await invokeService(
       'auth-service',
       'api/auth/admin/password/reset',
       'POST',
       { email },
-      { headers: getAuthHeaders(token) }
+      { headers: getAuthHeaders(token) },
     );
   } catch (error) {
     logger.error('Failed to trigger admin password reset', {

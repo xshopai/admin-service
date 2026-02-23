@@ -22,13 +22,7 @@ const getAuthHeaders = (token) => {
  */
 export async function fetchAllOrders(token) {
   try {
-    return await invokeService(
-      'order-service',
-      'api/admin/orders',
-      'GET',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', 'api/admin/orders', 'GET', null, { headers: getAuthHeaders(token) });
   } catch (error) {
     logger.error('Failed to fetch orders from order-service', {
       error: error.message,
@@ -47,13 +41,7 @@ export async function fetchOrdersPaged(token, query = {}) {
   try {
     const queryString = new URLSearchParams(query).toString();
     const endpoint = queryString ? `api/admin/orders/paged?${queryString}` : 'api/admin/orders/paged';
-    return await invokeService(
-      'order-service',
-      endpoint,
-      'GET',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', endpoint, 'GET', null, { headers: getAuthHeaders(token) });
   } catch (error) {
     logger.error('Failed to fetch paged orders from order-service', {
       error: error.message,
@@ -70,13 +58,9 @@ export async function fetchOrdersPaged(token, query = {}) {
  */
 export async function fetchOrderById(orderId, token) {
   try {
-    return await invokeService(
-      'order-service',
-      `api/admin/orders/${orderId}`,
-      'GET',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', `api/admin/orders/${orderId}`, 'GET', null, {
+      headers: getAuthHeaders(token),
+    });
   } catch (error) {
     logger.error('Failed to fetch order from order-service', {
       error: error.message,
@@ -95,13 +79,9 @@ export async function fetchOrderById(orderId, token) {
  */
 export async function updateOrderStatus(orderId, statusData, token) {
   try {
-    return await invokeService(
-      'order-service',
-      `api/admin/orders/${orderId}/status`,
-      'PUT',
-      statusData,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', `api/admin/orders/${orderId}/status`, 'PUT', statusData, {
+      headers: getAuthHeaders(token),
+    });
   } catch (error) {
     logger.error('Failed to update order status in order-service', {
       error: error.message,
@@ -119,13 +99,9 @@ export async function updateOrderStatus(orderId, statusData, token) {
  */
 export async function deleteOrderById(orderId, token) {
   try {
-    return await invokeService(
-      'order-service',
-      `api/admin/orders/${orderId}`,
-      'DELETE',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', `api/admin/orders/${orderId}`, 'DELETE', null, {
+      headers: getAuthHeaders(token),
+    });
   } catch (error) {
     logger.error('Failed to delete order from order-service', {
       error: error.message,
@@ -145,13 +121,7 @@ export async function fetchOrderStats(token, options = {}) {
   try {
     const queryString = new URLSearchParams(options).toString();
     const endpoint = queryString ? `api/admin/orders/stats?${queryString}` : 'api/admin/orders/stats';
-    return await invokeService(
-      'order-service',
-      endpoint,
-      'GET',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', endpoint, 'GET', null, { headers: getAuthHeaders(token) });
   } catch (error) {
     logger.error('Failed to fetch order stats from order-service', {
       error: error.message,
@@ -168,13 +138,9 @@ export async function fetchOrderStats(token, options = {}) {
  */
 export async function fetchOrderTracking(orderId, token) {
   try {
-    return await invokeService(
-      'order-service',
-      `api/admin/orders/${orderId}/tracking`,
-      'GET',
-      null,
-      { headers: getAuthHeaders(token) }
-    );
+    return await invokeService('order-service', `api/admin/orders/${orderId}/tracking`, 'GET', null, {
+      headers: getAuthHeaders(token),
+    });
   } catch (error) {
     logger.error('Failed to fetch order tracking from order-service', {
       error: error.message,
