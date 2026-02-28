@@ -17,8 +17,8 @@ const config = {
     host: process.env.HOST || '0.0.0.0',
   },
 
-  // Service Invocation Mode
-  serviceInvocationMode: process.env.SERVICE_INVOCATION_MODE || 'http',
+  // Platform Mode
+  platformMode: process.env.PLATFORM_MODE || 'direct',
 
   // External Services (URLs for http mode)
   services: {
