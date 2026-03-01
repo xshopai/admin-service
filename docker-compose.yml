@@ -15,10 +15,7 @@ services:
       - PORT=1011
       - RABBITMQ_URL=amqp://admin:admin123@rabbitmq-message-broker:5672
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-      - USER_SERVICE_URL=http://user-service:1001
-      - PRODUCT_SERVICE_URL=http://product-service:1002
-      - ORDER_SERVICE_URL=http://order-service:1003
-      - AUTH_SERVICE_URL=http://auth-service:8003
+      # SERVICE_BASE_URL not needed in compose — resolver uses port registry for container names
     networks:
       - xshopai-network
     healthcheck:

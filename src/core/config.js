@@ -20,26 +20,6 @@ const config = {
   // Platform Mode
   platformMode: process.env.PLATFORM_MODE || 'direct',
 
-  // External Services (URLs for http mode)
-  services: {
-    user: process.env.USER_SERVICE_URL || 'http://localhost:8002',
-    product: process.env.PRODUCT_SERVICE_URL || 'http://localhost:8001',
-    order: process.env.ORDER_SERVICE_URL || 'http://localhost:8006',
-    payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:8009',
-    audit: process.env.AUDIT_SERVICE_URL || 'http://localhost:8011',
-    notification: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:8011',
-  },
-
-  // Service App IDs (for dapr mode)
-  serviceAppIds: {
-    user: process.env.USER_SERVICE_APP_ID || 'user-service',
-    product: process.env.PRODUCT_SERVICE_APP_ID || 'product-service',
-    order: process.env.ORDER_SERVICE_APP_ID || 'order-service',
-    payment: process.env.PAYMENT_SERVICE_APP_ID || 'payment-service',
-    audit: process.env.AUDIT_SERVICE_APP_ID || 'audit-service',
-    notification: process.env.NOTIFICATION_SERVICE_APP_ID || 'notification-service',
-  },
-
   // Security
   security: {
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS, 10) || 12,

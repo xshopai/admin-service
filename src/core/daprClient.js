@@ -1,4 +1,5 @@
 import logger from './logger.js';
+import { resolve as resolveService } from './serviceResolver.js';
 import { getMessagingProvider } from '../messaging/index.js';
 
 // Service invocation mode (independent from messaging)
@@ -19,15 +20,7 @@ const SERVICE_APP_IDS = {
   'notification-service': process.env.NOTIFICATION_SERVICE_APP_ID || 'notification-service',
 };
 
-// Direct HTTP URLs for service invocation (used when PLATFORM_MODE=direct)
-const SERVICE_URLS = {
-  'user-service': process.env.USER_SERVICE_URL || 'http://xshopai-user-service:8002',
-  'order-service': process.env.ORDER_SERVICE_URL || 'http://xshopai-order-service:8006',
-  'product-service': process.env.PRODUCT_SERVICE_URL || 'http://xshopai-product-service:8001',
-  'payment-service': process.env.PAYMENT_SERVICE_URL || 'http://xshopai-payment-service:8009',
-  'audit-service': process.env.AUDIT_SERVICE_URL || 'http://xshopai-audit-service:8012',
-  'notification-service': process.env.NOTIFICATION_SERVICE_URL || 'http://xshopai-notification-service:8011',
-};
+// Direct HTTP URLs resolved via serviceResolver (port registry local, SERVICE_BASE_URL on Azure)
 
 /**
  * Invoke a method on another service
@@ -59,8 +52,8 @@ export async function invokeService(serviceName, methodName, httpMethod = 'GET',
         httpMethod,
       });
     } else {
-      // Direct HTTP call
-      const baseUrl = SERVICE_URLS[serviceName] || `http://xshopai-${serviceName}:8000`;
+      // Direct HTTP call — resolved via serviceResolver
+      const baseUrl = resolveService(serviceName);
       url = `${baseUrl}/${cleanMethodName}`;
 
       logger.debug('Invoking service via HTTP', {
