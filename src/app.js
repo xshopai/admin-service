@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import validateConfig from './validators/config.validator.js';
 import config from './core/config.js';
 import logger from './core/logger.js';
+import { register as consulRegister, deregister as consulDeregister } from './core/consulRegistration.js';
 import adminRoutes from './routes/admin.routes.js';
 import homeRoutes from './routes/home.routes.js';
 import operationalRoutes from './routes/operational.routes.js';
@@ -36,16 +37,18 @@ const PORT = config.server.port;
 const HOST = config.server.host;
 const displayHost = HOST === '0.0.0.0' ? 'localhost' : HOST;
 
-app.listen(PORT, HOST, () => {
+app.listen(PORT, HOST, async () => {
   logger.info(`Admin service running on ${displayHost}:${PORT} in ${config.env} mode`, {
     service: 'admin-service',
     version: '1.0.0',
   });
+  await consulRegister('admin-service', PORT, HOST);
 });
 
 // Graceful shutdown
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = async (signal) => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`);
+  await consulDeregister();
   process.exit(0);
 };
 
