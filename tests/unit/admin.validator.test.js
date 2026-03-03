@@ -1,4 +1,4 @@
-import adminValidator from '../src/shared/validators/admin.validator.js';
+import adminValidator from '../../src/validators/admin.validator.js';
 
 describe('adminValidator', () => {
   describe('isValidObjectId', () => {

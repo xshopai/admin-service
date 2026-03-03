@@ -8,8 +8,8 @@
 // Note: Admin endpoints require authentication with admin role
 
 import axios from 'axios';
-import { generateTestUser, createUser, deleteUser, sleep } from '../../shared/helpers/user.js';
-import { registerUser, login } from '../../shared/helpers/auth.js';
+import { generateTestUser, createUser, deleteUser, sleep } from './helpers/user.js';
+import { registerUser, login } from './helpers/auth.js';
 
 const ADMIN_SERVICE_URL = process.env.ADMIN_SERVICE_URL || 'http://localhost:8003';
 const ADMIN_SERVICE_HEALTH_URL = process.env.ADMIN_SERVICE_HEALTH_URL || 'http://localhost:8003/health/ready';
